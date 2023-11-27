@@ -8,10 +8,16 @@
 typedef struct STMData_
 {
 	Locator *objects;
-    Locator *tr_locators;
+    Locator **vboxes;
 	ushort *tr_state;
     ushort *committed_tr_state;
 } STMData;
+
+typedef struct TX_Data_
+{
+    ReadSet read_set;
+    WriteSet write_set;
+} TX_Data;
 
 typedef struct Locator_
 {
