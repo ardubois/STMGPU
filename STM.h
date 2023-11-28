@@ -7,14 +7,15 @@
 
 typedef struct STMData_
 {
-	Locator *objects;
-    Locator **vboxes;
-	ushort *tr_state;
-    ushort *committed_tr_state;
+	Locator* objects;
+    Locator** vboxes;
+	ushort* tr_state;
+    ushort* committed_tr_state;
 } STMData;
 
 typedef struct TX_Data_
 {
+    uint tr_id;
     ReadSet read_set;
     WriteSet write_set;
 } TX_Data;
@@ -22,8 +23,8 @@ typedef struct TX_Data_
 typedef struct Locator_
 {
 	uint owner;
-	int new_version;
-	int old_version;
+	int* new_version;
+	int* old_version;
 } Locator;
 
 typedef struct readSet_
@@ -31,7 +32,7 @@ typedef struct readSet_
 	ushort size;
     Locator locator[ReadSetSize];
     uint object[ReadSetSize];
-    int value[ReadSetSize];
+    int* value[ReadSetSize];
 } readSet;
 
 typedef struct writeSet_
