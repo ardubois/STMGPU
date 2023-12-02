@@ -25,6 +25,35 @@ Locator* TX_new_locator(STMData stm_data, TX_Data tx_data)
   return locator;
 }
 
+int* TX_Open_Write(STMData stm_data, TX_Data tx_data, uint object)
+{
+
+    Locator *locator = stm_data -> vboxes[object];
+    Locator *new_locator = TX_new_locator(stm_data,tx_data);
+    switch (stm_data->tr_state[locator -> owner]) {
+            case COMMITTED:
+              new_locator.old_version =  locator->new_version;
+              break;
+            case ABORTED:
+              new_locator.old_version =  locator->old_version;
+              break;
+            case ACTIVE: 
+              new_locator.old_version = locator->old_version;
+              break;
+            default:
+                printf("TX_Read: invalid tr state!\n");
+                exit(0);
+          }
+    
+    ReadSet* read_set = tx_data-> read_set;
+    int size = tx_data-> size;
+    read_set -> locator[size] = locator;
+    read_set -> value[size] = version;
+    read_set -> object[size] = object;
+    read_set -> size ++;
+    return *version; 
+}
+
 int TX_Open_Read(STMData stm_data, TX_Data tx_data, uint object)
 {
     int* version;
@@ -54,30 +83,3 @@ int TX_Open_Read(STMData stm_data, TX_Data tx_data, uint object)
 }
 
 
-int* TX_Open_Write(STMData stm_data, TX_Data tx_data, uint object)
-{
-    int* version;
-    Locator *locator = stm_data -> vboxes[object];
-    switch (stm_data->tr_state[locator -> owner]) {
-            case COMMITTED:
-              version =  locator->new_version;
-              break;
-            case ABORTED:
-              version =  locator->old_version;
-              break;
-            case ACTIVE: 
-              version = locator->old_version;
-              break;
-            default:
-                printf("TX_Read: invalid tr state!\n");
-                exit(0);
-          }
-    
-    ReadSet* read_set = tx_data-> read_set;
-    int size = tx_data-> size;
-    read_set -> locator[size] = locator;
-    read_set -> value[size] = version;
-    read_set -> object[size] = object;
-    read_set -> size ++;
-    return *version; 
-}
