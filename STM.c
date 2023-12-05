@@ -44,13 +44,20 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
               new_locator->old_version =  locator->old_version;
               break;
             case ACTIVE: 
-              new_locator->old_version = locator->old_version;
+              if(__sync_val_compare_and_swap(&stm_data->tr_state[locator -> owner],ACTIVE ,ABORTED))
+              {
+                 new_locator->old_version = locator->old_version;
+              } else
+                 {
+                  __sync_val_compare_and_swap(&stm_data->tr_state[new_locator -> owner],ACTIVE ,ABORTED);
+                 }
               break;
             default:
                 printf("TX_Read: invalid tr state!\n");
                 exit(0);
           }
-    __sync_val_compare_and_swap(&stm_data -> vboxes[object],locator ,new_locator);
+    if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
+          __sync_val_compare_and_swap(&stm_data -> vboxes[object],locator ,new_locator);
     
     return new_locator->new_version; 
 }
