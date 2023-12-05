@@ -5,40 +5,42 @@
 #define COMMITTED   2
 #define ABORTED     3
 
-typedef struct STMData_
-{
-	Locator* objects;
-    Locator** vboxes;
-	ushort* tr_state;
-    Locator* locators;
-    ushort num_locators;
-} STMData;
-
-typedef struct TX_Data_
-{
-    uint tr_id;
-    ushort next_locator;
-    ReadSet read_set;
-    WriteSet write_set;
-} TX_Data;
-
 typedef struct Locator_
 {
-	uint owner;
+	unsigned int owner;
 	int* new_version;
 	int* old_version;
 } Locator;
 
 typedef struct readSet_
 {
-	ushort size;
-    Locator locator[ReadSetSize];
-    uint object[ReadSetSize];
+	unsigned short size;
+    Locator* locator[ReadSetSize];
+    unsigned int object[ReadSetSize];
     int* value[ReadSetSize];
-} readSet;
+} ReadSet;
 
 typedef struct writeSet_
 {
-    ushort size;
-    uint object[ReadSetSize];
-}
+    unsigned short size;
+    unsigned int object[ReadSetSize];
+} WriteSet;
+
+typedef struct TX_Data_
+{
+    unsigned int tr_id;
+    unsigned short next_locator;
+    ReadSet read_set;
+    WriteSet write_set;
+} TX_Data;
+
+typedef struct STMData_
+{
+	Locator* objects;
+    Locator** vboxes;
+	unsigned short* tr_state;
+    Locator* locators;
+    unsigned short num_locators;
+    TX_Data* tx_data;
+} STMData;
+
