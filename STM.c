@@ -110,6 +110,7 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
                 printf("TX_Read: invalid tr state!\n");
                 exit(0);
           }
+    printf("depois da criaççao do locator\n");
     if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
          if(__sync_bool_compare_and_swap(&stm_data -> vboxes[object],locator ,new_locator))
             if(TX_validate_readset(stm_data,tx_data))
@@ -231,7 +232,7 @@ void* foo(void* p){
     int* ptr_value=TX_Open_Write(stm_data,tx_data,1);
     if(ptr_value==0)
        printf("aborteeeeedddd");
-    *ptr_value = *ptr_value+1 ;
+    //*ptr_value = *ptr_value+1 ;
     printf("Antes do commit\n");
     TX_commit(stm_data,tx_data);
     return NULL;
