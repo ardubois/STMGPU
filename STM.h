@@ -37,10 +37,13 @@ typedef struct TX_Data_
 typedef struct STMData_
 {
 	Locator* objects;
+    int* objects_data;
     Locator** vboxes;
 	unsigned short* tr_state;
     Locator* locators;
+    int* locators_data;
     unsigned short num_locators;
+    unsigned short num_tr;
     TX_Data* tx_data;
 } STMData;
 
