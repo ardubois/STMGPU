@@ -103,7 +103,7 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
                  *new_locator-> new_version = *new_locator-> old_version;
               } else
                  {
-                  __sync_bool_compare_and_swap(&stm_data->tr_state[new_locator -> owner],ACTIVE ,ABORTED);
+                  __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
                  }
               break;
             default:
@@ -224,12 +224,15 @@ void print_locator(STMData* stm_data,Locator *locator)
 void* foo(void* p){
     STMData* stm_data = (STMData*) p;
     TX_Data* tx_data = TX_Init(stm_data);
-    
+    printf("Antes do open read\n");
     int value=TX_Open_Read(stm_data,tx_data,0);
-        
+    printf("Antes do open write\n");    
 
     int* ptr_value=TX_Open_Write(stm_data,tx_data,1);
-    *ptr_value = 666;
+    if(ptr_value==0)
+       printf("aborteeeeedddd");
+    *ptr_value = *ptr_value+1 ;
+    printf("Antes do commit\n");
     TX_commit(stm_data,tx_data);
     return NULL;
     

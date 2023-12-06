@@ -2,6 +2,7 @@
 #define ReadSetSize		2
 
 #define MAX_LOCATORS 10
+
 #define ACTIVE      1
 #define COMMITTED   2
 #define ABORTED     3
