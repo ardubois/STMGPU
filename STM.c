@@ -42,7 +42,10 @@ Locator* TX_new_locator(STMData* stm_data, TX_Data* tx_data)
   locator += (tx_data->tr_id * stm_data -> num_locators) + tx_data-> next_locator;
   tx_data -> next_locator++;
   if(tx_data -> next_locator == MAX_LOCATORS)
+    {
      printf("Max locators reached");
+     exit(0);
+    }
   return locator;
 }
 
@@ -97,6 +100,8 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
     Locator *locator = stm_data -> vboxes[object];
     Locator *new_locator = TX_new_locator(stm_data,tx_data);
     new_locator ->owner = tx_data->tr_id;
+    if(tx_data->tr_id== 2000)
+    {printf ("impossible!\n"); exit(0);}
     switch (stm_data->tr_state[locator -> owner]) {
             case COMMITTED:
               *new_locator-> old_version =  *locator->new_version;
@@ -128,6 +133,7 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
             int size = tx_data-> write_set.size;
             write_set -> locators[size] = new_locator;
             write_set -> size ++;
+           print_locator(stm_data,new_locator);
             if(TX_validate_readset(stm_data,tx_data))
               {
                return new_locator->new_version;
@@ -179,9 +185,9 @@ void TX_abort_tr(STMData* stm_data, TX_Data* tx_data){
 
   for (int i = 0; i < tx_data->write_set.size; i ++)
   {
-    if(!__sync_bool_compare_and_swap(&tx_data -> write_set.locators[i]->owner, tx_data->tr_id , (stm_data -> num_tr))+1)
+    if(!__sync_bool_compare_and_swap(&tx_data -> write_set.locators[i]->owner, tx_data->tr_id , (stm_data -> num_tr)+1))
     {
-      printf("nao deveria\n owner = %d, id = %d",tx_data -> write_set.locators[i]->owner,  tx_data->tr_id);
+      printf("nao deveria\n owner = %d, id = %d,locaotr: %p\n",tx_data -> write_set.locators[i]->owner,  tx_data->tr_id,tx_data ->write_set.locators[i]);
       exit(0);
     }
   }
