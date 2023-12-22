@@ -25,7 +25,7 @@ typedef struct readSet_
 typedef struct writeSet_
 {
     unsigned short size;
-    unsigned int object[ReadSetSize];
+    Locator* locator[WriteSetSize];
 } WriteSet;
 
 typedef struct TX_Data_
@@ -34,6 +34,8 @@ typedef struct TX_Data_
     unsigned short next_locator;
     ReadSet read_set;
     WriteSet write_set;
+    unsigned short n_aborted;
+    unsigned short n_committed; // maximum 1
 } TX_Data;
 
 typedef struct STMData_
