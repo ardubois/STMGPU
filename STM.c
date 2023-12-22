@@ -12,13 +12,13 @@ STMData* STM_start(int numObjects, int numTransactions, int numLocators)
     meta_data-> objects = malloc(numObjects * sizeof(Locator));
     meta_data-> objects_data = malloc(2*numObjects * sizeof(int));
     meta_data-> vboxes = malloc(numObjects * sizeof(Locator*));
-    meta_data-> tr_state = malloc(numTransactions * sizeof(ushort)+1);
+    meta_data-> tr_state = malloc(numTransactions * sizeof(ushort)+2);
     meta_data-> locators = malloc(numLocators * numTransactions * sizeof(Locator));
     meta_data-> locators_data = malloc(2*numLocators * numTransactions * sizeof(int));
     meta_data -> num_locators = numLocators;
     meta_data -> tx_data  = malloc(numTransactions * sizeof(TX_Data));
     meta_data -> num_tr = numTransactions;
-    meta_data -> tr_state[numTransactions] == ABORTED;
+    meta_data -> tr_state[numTransactions+1] == ABORTED;
     return meta_data;
 }
 
@@ -88,6 +88,7 @@ int TX_commit(STMData* stm_data, TX_Data* tx_data)
       return 1;
      }
   }
+    __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
      return 0;         
 }
 int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
@@ -112,8 +113,7 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
                  *new_locator-> new_version = *new_locator-> old_version;
               } else
                  {
-                  __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
-                  assert(stm_data->tr_state[tx_data->tr_id] == ABORTED);
+                  assert(__sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED));
                   tx_data -> next_locator--;
                  }
               break;
@@ -126,7 +126,7 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
          if(__sync_bool_compare_and_swap(&stm_data -> vboxes[object],locator ,new_locator)){
             WriteSet* write_set = &tx_data-> write_set;
             int size = tx_data-> write_set.size;
-            write_set -> locator[size] = locator;
+            write_set -> locators[size] = new_locator;
             write_set -> size ++;
             if(TX_validate_readset(stm_data,tx_data))
               {
@@ -177,10 +177,16 @@ int TX_Open_Read(STMData* stm_data, TX_Data* tx_data, uint object)
 void TX_abort_tr(STMData* stm_data, TX_Data* tx_data){
 
 
-  for (int i = 0; i < tx_data->writeSet.size; i ++)
+  for (int i = 0; i < tx_data->write_set.size; i ++)
   {
-    assert(__sync_bool_compare_and_swap(&tx_data -> write_set.locators[size]->owner,tx_data->tr_id , stm_data -> num_tr);)
+    if(!__sync_bool_compare_and_swap(&tx_data -> write_set.locators[i]->owner, tx_data->tr_id , (stm_data -> num_tr))+1)
+    {
+      printf("nao deveria\n owner = %d, id = %d",tx_data -> write_set.locators[i]->owner,  tx_data->tr_id);
+      exit(0);
+    }
   }
+
+  assert(__sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ABORTED,ACTIVE));
 
   tx_data-> read_set.size = 0;
   tx_data -> write_set.size = 0;
@@ -257,9 +263,9 @@ void* foo(void* p){
    
    STMData* stm_data = (STMData*) p;
    TX_Data* tx_data = TX_Init(stm_data);
-   int aborted = 0;
+   int aborted;
    do{
-
+      aborted = 0;
       int value=TX_Open_Read(stm_data,tx_data,0);
       if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
       {
@@ -275,6 +281,7 @@ void* foo(void* p){
       {
         TX_abort_tr(stm_data,tx_data);
         aborted = 1;
+        printf("aborted %d\n", tx_data-> tr_id);
       }
       
    }while(aborted);
@@ -283,35 +290,48 @@ void* foo(void* p){
     
 }
 
+void print_stats(STMData* stm_data)
+{
+  int size = stm_data -> num_tr;
+  TX_Data* tx_data = stm_data -> tx_data;
+  int aborted = 0 ;
+  int committed = 0;
+  for(int i=0; i< size; i++)
+  {
+    aborted += tx_data[i].n_aborted;
+    committed += tx_data[i].n_committed;
+  }
+  printf("Total Aborts: %d Total Commits: %d\n", aborted, committed);
+}
+
 int main()
 {
   int num_objects = 2;
   int num_locators = MAX_LOCATORS;
-  int num_tx = 4;
+  int num_tx = 2000;
  
   STMData* stm_data = STM_start(num_objects, num_tx, num_locators); 
   init_objects(stm_data,num_objects);
   init_locators(stm_data,num_tx,num_locators);
 
-  pthread_t tid1; 
-  pthread_t tid2; 
-  pthread_t tid3; 
-  pthread_t tid4; 
+  pthread_t threads[num_tx];
+
+  for(int i=0; i< num_tx; i++)
+   {
+    pthread_create(&threads[i],NULL, foo, stm_data);
+   }
   
-  pthread_create(&tid1, NULL, foo, stm_data); 
-  pthread_create(&tid2, NULL, foo, stm_data);
-  pthread_create(&tid3, NULL, foo, stm_data); 
-  pthread_create(&tid4, NULL, foo, stm_data); 
+  //pthread_create(&tid1, NULL, foo, stm_data); 
   
-  pthread_join(tid1, NULL); 
-  pthread_join(tid2, NULL);
-  pthread_join(tid3, NULL); 
-  pthread_join(tid4, NULL); 
-  printf("After Thread\n"); 
+  for(int i=0; i< num_tx; i++)
+   {
+    pthread_join(threads[i],NULL);
+   }
 
   
   print_locator(stm_data,stm_data->vboxes[0]);
   print_locator(stm_data,stm_data->vboxes[1]);
+  print_stats(stm_data);
   
   
 }

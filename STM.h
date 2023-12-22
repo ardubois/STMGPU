@@ -25,7 +25,7 @@ typedef struct readSet_
 typedef struct writeSet_
 {
     unsigned short size;
-    Locator* locator[WriteSetSize];
+    Locator* locators[WriteSetSize];
 } WriteSet;
 
 typedef struct TX_Data_
