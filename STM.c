@@ -24,9 +24,14 @@ STMData* STM_start(int numObjects, int numTransactions, int numLocators)
 }
 
 TX_Data* TX_Init(STMData* stm_data){
-    unsigned int tx_id = tr_id_gen;
-    __sync_fetch_and_add (&tr_id_gen, 1);
-    
+   unsigned int tx_id;
+
+   do{
+
+      tx_id = tr_id_gen;
+   }while(! __sync_bool_compare_and_swap(&tr_id_gen, tx_id ,tx_id+1));
+   
+
     TX_Data *d = &stm_data -> tx_data[tx_id];
     d-> tr_id = tx_id;
     d-> next_locator = 0;
@@ -293,7 +298,7 @@ void* foo(void* p){
       {
         TX_abort_tr(stm_data,tx_data);
         aborted = 1;
-        printf("aborted %d\n", tx_data-> tr_id);
+       
       }
       if(!aborted)
           assert(stm_data->tr_state[tx_data->tr_id] != ACTIVE);
