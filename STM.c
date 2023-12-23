@@ -12,19 +12,21 @@ STMData* STM_start(int numObjects, int numTransactions, int numLocators)
     meta_data-> objects = malloc(numObjects * sizeof(Locator));
     meta_data-> objects_data = malloc(2*numObjects * sizeof(int));
     meta_data-> vboxes = malloc(numObjects * sizeof(Locator*));
-    meta_data-> tr_state = malloc(numTransactions * sizeof(ushort)+2);
+    meta_data-> tr_state = malloc(numTransactions * sizeof(ushort)+2); // 1 for the always committed Tr and 1 for the always aborted 
     meta_data-> locators = malloc(numLocators * numTransactions * sizeof(Locator));
     meta_data-> locators_data = malloc(2*numLocators * numTransactions * sizeof(int));
     meta_data -> num_locators = numLocators;
     meta_data -> tx_data  = malloc(numTransactions * sizeof(TX_Data));
     meta_data -> num_tr = numTransactions;
-    meta_data -> tr_state[numTransactions+1] == ABORTED;
+    meta_data -> tr_state[numTransactions] = COMMITTED;
+    meta_data -> tr_state[numTransactions+1] = ABORTED;
     return meta_data;
 }
 
 TX_Data* TX_Init(STMData* stm_data){
     unsigned int tx_id = tr_id_gen;
-    tr_id_gen++;
+    __sync_fetch_and_add (&tr_id_gen, 1);
+    
     TX_Data *d = &stm_data -> tx_data[tx_id];
     d-> tr_id = tx_id;
     d-> next_locator = 0;
@@ -92,16 +94,17 @@ int TX_commit(STMData* stm_data, TX_Data* tx_data)
      }
   }
     __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
+    assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
      return 0;         
 }
+
 int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
 {
 
     Locator *locator = stm_data -> vboxes[object];
     Locator *new_locator = TX_new_locator(stm_data,tx_data);
     new_locator ->owner = tx_data->tr_id;
-    if(tx_data->tr_id== 2000)
-    {printf ("impossible!\n"); exit(0);}
+
     switch (stm_data->tr_state[locator -> owner]) {
             case COMMITTED:
               *new_locator-> old_version =  *locator->new_version;
@@ -140,9 +143,11 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
               }
             else
               {
-                __sync_bool_compare_and_swap(&stm_data->tr_state[new_locator -> owner],ACTIVE ,ABORTED);
+                __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
               }
-         }      
+         } else { __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);}
+  
+    assert(stm_data->tr_state[tx_data->tr_id] != ACTIVE) ;    
     return 0; 
 }
 
@@ -192,6 +197,7 @@ void TX_abort_tr(STMData* stm_data, TX_Data* tx_data){
     }
   }
 
+  assert(stm_data->tr_state[tx_data->tr_id] == ABORTED);
   assert(__sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ABORTED,ACTIVE));
 
   tx_data-> read_set.size = 0;
@@ -282,13 +288,15 @@ void* foo(void* p){
           TX_commit(stm_data,tx_data);
         }
       }
-      
+      //assert(stm_data->tr_state[tx_data->tr_id] != ACTIVE);
       if(stm_data->tr_state[tx_data->tr_id] == ABORTED)
       {
         TX_abort_tr(stm_data,tx_data);
         aborted = 1;
         printf("aborted %d\n", tx_data-> tr_id);
       }
+      if(!aborted)
+          assert(stm_data->tr_state[tx_data->tr_id] != ACTIVE);
       
    }while(aborted);
     
