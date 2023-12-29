@@ -1,0 +1,2 @@
+nvcc -c -rdc=true --maxrregcount 63 API.cu -o API.o
+nvcc -rdc=true --maxrregcount 63 API.o exe.cu
