@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define N_OBJECTS 2000
+#define N_OBJECTS 50
 
 void* foo(void* p){
    
@@ -50,7 +50,7 @@ int main()
 {
   int num_objects = N_OBJECTS;
   int num_locators = MAX_LOCATORS;
-  int num_tx = 1000;
+  int num_tx = 100;
  
   STMData* stm_data = STM_start(num_objects, num_tx, num_locators); 
   init_objects(stm_data,num_objects);

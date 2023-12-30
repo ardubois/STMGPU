@@ -125,15 +125,20 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
             case ACTIVE: 
               if(TX_contention_manager(stm_data,tx_data, new_locator->owner,locator->owner))
               {
-                if(__sync_bool_compare_and_swap(&stm_data->tr_state[locator -> owner],ACTIVE ,ABORTED))
+                if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
                 {
+                  if(__sync_bool_compare_and_swap(&stm_data->tr_state[locator -> owner],ACTIVE ,ABORTED))
+                  {
                    *new_locator->old_version = *locator->old_version;
                    *new_locator-> new_version = *new_locator-> old_version;
-                } else {
+                  } else {
                   __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
                   assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
                   tx_data -> next_locator--;
                  }
+                } else {
+                  tx_data -> next_locator--;
+                }
               } else{
                    __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
                    assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
@@ -167,7 +172,14 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
     return 0; 
 }
 
-int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
+int TX_contention_manager3(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
+{
+    if(enemy < me)
+       return 1;
+    return 0;
+}
+
+int TX_contention_manager2(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
   if(tx_data->n_aborted > BACKOFF)
   { 
@@ -175,6 +187,16 @@ int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, u
     if(data_enemy-> write_set.size < tx_data ->write_set.size)
        return 1;
     else return 0;
+  }
+  return 0;
+}
+
+int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
+{
+  if(tx_data->n_aborted > BACKOFF)
+  { 
+    return 1;
+    
   }
   return 0;
 }
