@@ -1,7 +1,12 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+
+#define BACKOFF 200
 #define WriteSetSize	2
 #define ReadSetSize		2
 
-#define MAX_LOCATORS 40
+#define MAX_LOCATORS 50
 
 #define ACTIVE      1
 #define COMMITTED   2
@@ -36,11 +41,14 @@ typedef struct TX_Data_
     WriteSet write_set;
     unsigned short n_aborted;
     unsigned short n_committed; // maximum 1
+    unsigned int cm_enemy;
+    unsigned int cm_aborts;
 } TX_Data;
 
 typedef struct STMData_
 {
 	Locator* objects;
+    int n_objects;
     int* objects_data;
     Locator** vboxes;
 	unsigned short* tr_state;
@@ -51,3 +59,20 @@ typedef struct STMData_
     TX_Data* tx_data;
 } STMData;
 
+STMData* STM_start(int numObjects, int numTransactions, int numLocators);
+TX_Data* TX_Init(STMData* stm_data);
+Locator* TX_new_locator(STMData* stm_data, TX_Data* tx_data);
+int TX_validate_readset(STMData* stm_data, TX_Data* tx_data);
+int TX_commit(STMData* stm_data, TX_Data* tx_data);
+int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object);
+int TX_Open_Read(STMData* stm_data, TX_Data* tx_data, uint object);
+void TX_abort_tr(STMData* stm_data, TX_Data* tx_data);
+int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy);
+
+void init_locators(STMData* stm_data,int num_tx, int num_locators);
+void init_objects(STMData* stm_data,int num_objects);
+
+void print_vboxes(STMData* stm_data, Locator **vboxes);
+void print_tr_state(int tr_state);
+void print_locator(STMData* stm_data,Locator *locator);
+void print_stats(STMData* stm_data);
