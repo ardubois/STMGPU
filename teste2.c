@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define N_OBJECTS 100
+#define N_OBJECTS 5
 
 void* foo(void* p){
    
@@ -10,8 +10,11 @@ void* foo(void* p){
    TX_Data* tx_data = TX_Init(stm_data);
 
    int o1 = rand() % (N_OBJECTS -1);
-   int o2 = rand() % (N_OBJECTS -1);
-   printf("o1: %d, o2: %d\n",o1,o2);
+   int o2;
+   do{
+   o2 = rand() % (N_OBJECTS -1);
+   }while(o1 == o2);
+      //printf("o1: %d, o2: %d\n",o1,o2);
    
    int aborted;
    do{

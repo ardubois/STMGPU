@@ -1,5 +1,7 @@
 all: teste1 teste2
 
+debug: dstm dteste1 dteste2
+
 teste2: STM.o
 	gcc -o teste2 teste2.c STM.o
 
@@ -9,5 +11,13 @@ teste1: stm
 stm: STM.c 
 	gcc -fPIC -o STM.o -c STM.c
 
+dteste2: STM.o
+	gcc -g -o teste2 teste2.c STM.o
+
+dteste1: dstm
+	gcc -g -o teste1 teste1.c STM.o
+
+dstm: STM.c 
+	gcc -g -fPIC -o STM.o -c STM.c
 clean:
-	rm STM.o teste1
+	rm STM.o teste1 teste2

@@ -53,7 +53,7 @@ Locator* TX_new_locator(STMData* stm_data, TX_Data* tx_data)
   tx_data -> next_locator++;
   if(tx_data -> next_locator == MAX_LOCATORS)
     {
-     printf("Max locators reached");
+     printf("Max locators reached!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
      exit(0);
     }
   return locator;
@@ -91,12 +91,31 @@ int TX_validate_readset(STMData* stm_data, TX_Data* tx_data)
   return 1;
 }
 
+void TX_free_writeset(STMData* stm_data, TX_Data* tx_data, int state){
+  if (state == COMMITTED)
+  {
+    for(int i=0;i<tx_data->write_set.size;i++)
+    {
+      printf("\nowner: %d, me: %d\n\n",tx_data->write_set.locators[i]->owner,tx_data->tr_id);
+      assert(__sync_bool_compare_and_swap(&tx_data->write_set.locators[i]->owner,tx_data->tr_id,stm_data-> num_tr));
+    }
+  } else{
+for(int i=0;i<tx_data->write_set.size;i++)
+    {
+      printf("\nowner: %d, me: %d\n\n",tx_data->write_set.locators[i]->owner,tx_data->tr_id);
+      assert(__sync_bool_compare_and_swap(&tx_data->write_set.locators[i]->owner,tx_data->tr_id,stm_data-> num_tr+1));
+    }
+  }
+
+}
+
 int TX_commit(STMData* stm_data, TX_Data* tx_data)
 {
   if(TX_validate_readset(stm_data,tx_data))
   {
      if( __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,COMMITTED))
      {
+      TX_free_writeset(stm_data,tx_data, COMMITTED);
       tx_data -> n_committed ++;
       return 1;
      }
@@ -106,6 +125,7 @@ int TX_commit(STMData* stm_data, TX_Data* tx_data)
      return 0;         
 }
 
+
 int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
 {
    while (stm_data->tr_state[tx_data->tr_id] != ABORTED)
@@ -113,7 +133,7 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
       Locator *locator = stm_data -> vboxes[object];
       Locator *new_locator = TX_new_locator(stm_data,tx_data);
       new_locator ->owner = tx_data->tr_id;
-
+      assert(locator -> owner != new_locator -> owner);
       switch (stm_data->tr_state[locator -> owner]) {
             case COMMITTED:
               *new_locator-> old_version =  *locator->new_version;
@@ -143,41 +163,62 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
                   continue;
                 }
               } else{
-                   //__sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
-                   //assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
+                  // __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
+                  // assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
                    tx_data -> next_locator--;
                    continue;
               }
-                
+               
               break;
             default:
                 printf("TX_Read: invalid tr state!\n");
                 exit(0);
           }
    
-    if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
+      if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
+      {
          if(__sync_bool_compare_and_swap(&stm_data -> vboxes[object],locator ,new_locator)){
             WriteSet* write_set = &tx_data-> write_set;
             int size = tx_data-> write_set.size;
             write_set -> locators[size] = new_locator;
             write_set -> size ++;
-           print_locator(stm_data,new_locator);
+          
+             
             if(TX_validate_readset(stm_data,tx_data))
-              {
+              {print_locator(stm_data,new_locator);
                return new_locator->new_version;
               }
             else
               {
                 __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
+                assert(stm_data->tr_state[tx_data->tr_id] == ABORTED) ;
               }
-         } else { __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);}
-  
+         } else { //
+              //__sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
+              tx_data -> next_locator--;
+              continue;
+         }
+      }
     assert(stm_data->tr_state[tx_data->tr_id] != ACTIVE) ;    
     return 0; 
    }
+   assert(stm_data->tr_state[tx_data->tr_id] == ABORTED) ;
+   return 0;
 }
 
-
+int TX_contention_manager6(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
+{
+  if(tx_data->cm_enemy == enemy)
+  { 
+    tx_data->cm_aborts ++;
+    if(tx_data->cm_aborts>=2)
+      return 1;
+  } else {
+    tx_data->cm_enemy = enemy;
+    tx_data->cm_aborts =0;
+  }
+  return 0;
+}
 
 int TX_contention_manager3(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
@@ -248,7 +289,7 @@ int TX_contention_manager4(STMData* stm_data, TX_Data* tx_data,unsigned int me, 
 
 int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
-  TX_contention_manager3(stm_data,tx_data, me, enemy);
+  TX_contention_manager6(stm_data,tx_data, me, enemy);
 }
 
 
@@ -299,8 +340,9 @@ void TX_abort_tr(STMData* stm_data, TX_Data* tx_data){
   }
 
   assert(stm_data->tr_state[tx_data->tr_id] == ABORTED);
+  //TX_free_writeset(stm_data,tx_data, ABORTED);
   assert(__sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ABORTED,ACTIVE));
-
+  
   tx_data-> read_set.size = 0;
   tx_data -> write_set.size = 0;
   tx_data -> n_aborted ++;
