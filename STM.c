@@ -108,12 +108,13 @@ int TX_commit(STMData* stm_data, TX_Data* tx_data)
 
 int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
 {
+   while (stm_data->tr_state[tx_data->tr_id] != ABORTED)
+   {
+      Locator *locator = stm_data -> vboxes[object];
+      Locator *new_locator = TX_new_locator(stm_data,tx_data);
+      new_locator ->owner = tx_data->tr_id;
 
-    Locator *locator = stm_data -> vboxes[object];
-    Locator *new_locator = TX_new_locator(stm_data,tx_data);
-    new_locator ->owner = tx_data->tr_id;
-
-    switch (stm_data->tr_state[locator -> owner]) {
+      switch (stm_data->tr_state[locator -> owner]) {
             case COMMITTED:
               *new_locator-> old_version =  *locator->new_version;
               *new_locator-> new_version = *new_locator-> old_version;
@@ -132,17 +133,20 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
                    *new_locator->old_version = *locator->old_version;
                    *new_locator-> new_version = *new_locator-> old_version;
                   } else {
-                  __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
-                  assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
+                //  __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
+                 // assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
                   tx_data -> next_locator--;
+                  continue;
                  }
                 } else {
                   tx_data -> next_locator--;
+                  continue;
                 }
               } else{
-                   __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
-                   assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
+                   //__sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
+                   //assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
                    tx_data -> next_locator--;
+                   continue;
               }
                 
               break;
@@ -170,13 +174,29 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
   
     assert(stm_data->tr_state[tx_data->tr_id] != ACTIVE) ;    
     return 0; 
+   }
 }
+
+
 
 int TX_contention_manager3(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
-    if(enemy < me)
-       return 1;
-    return 0;
+  if(tx_data->n_aborted > BACKOFF)
+  { 
+    TX_Data *data_enemy = &stm_data -> tx_data[enemy];
+    if(data_enemy-> write_set.size < tx_data ->write_set.size)
+    {
+      if (data_enemy-> n_aborted < tx_data->n_aborted)
+        return 1;
+      else
+        return 0;
+    }
+     if (data_enemy-> n_aborted < tx_data->n_aborted)
+        return 1;
+      else
+        return 0;
+  }
+  return 0;
 }
 
 int TX_contention_manager2(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
@@ -191,7 +211,7 @@ int TX_contention_manager2(STMData* stm_data, TX_Data* tx_data,unsigned int me, 
   return 0;
 }
 
-int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
+int TX_contention_manager5(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
   if(tx_data->n_aborted > BACKOFF)
   { 
@@ -200,6 +220,37 @@ int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, u
   }
   return 0;
 }
+
+int TX_contention_manager1(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
+{
+    if(enemy < me)
+       return 1;
+    return 0;
+}
+
+int TX_contention_manager4(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
+{
+    TX_Data *data_enemy = &stm_data -> tx_data[enemy];
+    if(data_enemy-> write_set.size < tx_data ->write_set.size)
+    {
+      return 1;
+    }
+    if(data_enemy-> write_set.size == tx_data ->write_set.size)
+    {
+      if (data_enemy-> n_aborted < tx_data->n_aborted)
+        return 1;
+      else
+        return 0;
+    }
+      
+  return 0;
+}
+
+int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
+{
+  TX_contention_manager3(stm_data,tx_data, me, enemy);
+}
+
 
 int TX_Open_Read(STMData* stm_data, TX_Data* tx_data, uint object)
 {
