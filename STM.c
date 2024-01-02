@@ -91,6 +91,7 @@ int TX_validate_readset(STMData* stm_data, TX_Data* tx_data)
   return 1;
 }
 
+/*
 void TX_free_writeset(STMData* stm_data, TX_Data* tx_data, int state){
   if (state == COMMITTED)
   {
@@ -108,14 +109,14 @@ for(int i=0;i<tx_data->write_set.size;i++)
   }
 
 }
-
+*/
 int TX_commit(STMData* stm_data, TX_Data* tx_data)
 {
   if(TX_validate_readset(stm_data,tx_data))
   {
      if( __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,COMMITTED))
      {
-      TX_free_writeset(stm_data,tx_data, COMMITTED);
+      //TX_free_writeset(stm_data,tx_data, COMMITTED);
       tx_data -> n_committed ++;
       return 1;
      }
@@ -211,13 +212,24 @@ int TX_contention_manager6(STMData* stm_data, TX_Data* tx_data,unsigned int me, 
   if(tx_data->cm_enemy == enemy)
   { 
     tx_data->cm_aborts ++;
-    if(tx_data->cm_aborts>=2)
+    if(tx_data->cm_aborts>=1000)
       return 1;
   } else {
     tx_data->cm_enemy = enemy;
     tx_data->cm_aborts =0;
   }
   return 0;
+}
+
+int TX_contention_manager7(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
+{
+
+  if(tx_data->cm_aborts > 5)
+  {
+    return 1;
+  } else {
+    tx_data->cm_aborts ++;   
+  }
 }
 
 int TX_contention_manager3(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
@@ -254,7 +266,7 @@ int TX_contention_manager2(STMData* stm_data, TX_Data* tx_data,unsigned int me, 
 
 int TX_contention_manager5(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
-  if(tx_data->n_aborted > BACKOFF)
+  if(tx_data->n_aborted > 100000000)
   { 
     return 1;
     
@@ -289,7 +301,7 @@ int TX_contention_manager4(STMData* stm_data, TX_Data* tx_data,unsigned int me, 
 
 int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
-  TX_contention_manager6(stm_data,tx_data, me, enemy);
+  TX_contention_manager7(stm_data,tx_data, me, enemy);
 }
 
 
