@@ -46,6 +46,19 @@ TX_Data* TX_Init(STMData* stm_data)
     return d;
 }
 
+void TX_Start(STMData* stm_data, TX_Data* d)
+{
+   
+    d -> read_set.size =0;
+    d -> write_set.size = 0;
+    //d -> n_aborted = 0;
+   // d -> n_committed = 0;
+    d -> cm_enemy = -1;
+    d -> cm_aborts = 0;
+    stm_data -> tr_state[d->tr_id] = ACTIVE;
+}
+
+
 Locator* TX_new_locator(STMData* stm_data, TX_Data* tx_data)
 {
   Locator* locator = stm_data -> locators;
@@ -117,6 +130,11 @@ int TX_commit(STMData* stm_data, TX_Data* tx_data)
      if( __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,COMMITTED))
      {
       //TX_free_writeset(stm_data,tx_data, COMMITTED);
+      for(int i=0;i<tx_data->write_set.size;i++)
+    {
+     // printf("\nowner: %d, me: %d\n\n",tx_data->write_set.locators[i]->owner,tx_data->tr_id);
+      assert(__sync_bool_compare_and_swap(&tx_data->write_set.locators[i]->owner,tx_data->tr_id,stm_data-> num_tr));
+    }
       tx_data -> n_committed ++;
       return 1;
      }
@@ -353,19 +371,19 @@ void TX_abort_tr(STMData* stm_data, TX_Data* tx_data){
 
   assert(stm_data->tr_state[tx_data->tr_id] == ABORTED);
   //TX_free_writeset(stm_data,tx_data, ABORTED);
-  assert(__sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ABORTED,ACTIVE));
+  //assert(__sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ABORTED,ACTIVE));
   
-  tx_data-> read_set.size = 0;
-  tx_data -> write_set.size = 0;
+  //tx_data-> read_set.size = 0;
+  //tx_data -> write_set.size = 0;
   tx_data -> n_aborted ++;
 }
 
-void init_objects(STMData* stm_data,int num_objects)
+void init_objects(STMData* stm_data,int num_objects, int value)
 {
   stm_data -> tr_state[stm_data->num_tr] = COMMITTED;
   for(int i=0;i<num_objects;i++)
   {
-    stm_data->objects_data[2*i] = 100;
+    stm_data->objects_data[2*i] = value;
     stm_data->objects_data[2*i+1] = 0;
     stm_data-> objects[i].new_version = &stm_data->objects_data[2*i];
     stm_data-> objects[i].old_version = &stm_data->objects_data[2*i+1];

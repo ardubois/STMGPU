@@ -8,6 +8,7 @@ void* foo(void* p){
    TX_Data* tx_data = TX_Init(stm_data);
    int aborted;
    do{
+      TX_Start(stm_data,tx_data);
       aborted = 0;
       int value=TX_Open_Read(stm_data,tx_data,0);
       if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
@@ -42,7 +43,7 @@ int main()
   int num_tx = 2000;
  
   STMData* stm_data = STM_start(num_objects, num_tx, num_locators); 
-  init_objects(stm_data,num_objects);
+  init_objects(stm_data,num_objects,100);
   init_locators(stm_data,num_tx,num_locators);
 
   pthread_t threads[num_tx];

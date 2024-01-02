@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define N_OBJECTS 3
+#define N_OBJECTS 100
 
 void* foo(void* p){
    
@@ -18,6 +18,7 @@ void* foo(void* p){
    
    int aborted;
    do{
+      TX_Start(stm_data,tx_data);
       aborted = 0;
       int* ptr1 = TX_Open_Write(stm_data,tx_data,o1);
       if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
@@ -53,10 +54,10 @@ int main()
 {
   int num_objects = N_OBJECTS;
   int num_locators = MAX_LOCATORS;
-  int num_tx = 500;
+  int num_tx = 1000;
  
   STMData* stm_data = STM_start(num_objects, num_tx, num_locators); 
-  init_objects(stm_data,num_objects);
+  init_objects(stm_data,num_objects,100);
   init_locators(stm_data,num_tx,num_locators);
 
   pthread_t threads[num_tx];

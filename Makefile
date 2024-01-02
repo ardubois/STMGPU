@@ -1,6 +1,9 @@
-all: teste1 teste2
+all: teste1 teste2 teste3
 
 debug: dstm dteste1 dteste2
+
+teste3: STM.o
+	gcc -o teste3 teste3.c STM.o
 
 teste2: STM.o
 	gcc -o teste2 teste2.c STM.o

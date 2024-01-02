@@ -6,7 +6,7 @@
 #define WriteSetSize	2
 #define ReadSetSize		2
 
-#define MAX_LOCATORS 50
+#define MAX_LOCATORS 200
 
 #define ACTIVE      1
 #define COMMITTED   2
@@ -61,6 +61,7 @@ typedef struct STMData_
 
 STMData* STM_start(int numObjects, int numTransactions, int numLocators);
 TX_Data* TX_Init(STMData* stm_data);
+void TX_Start(STMData* stm_data, TX_Data* d);
 Locator* TX_new_locator(STMData* stm_data, TX_Data* tx_data);
 int TX_validate_readset(STMData* stm_data, TX_Data* tx_data);
 int TX_commit(STMData* stm_data, TX_Data* tx_data);
@@ -70,7 +71,7 @@ void TX_abort_tr(STMData* stm_data, TX_Data* tx_data);
 int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy);
 
 void init_locators(STMData* stm_data,int num_tx, int num_locators);
-void init_objects(STMData* stm_data,int num_objects);
+void init_objects(STMData* stm_data,int num_objects, int value);
 
 void print_vboxes(STMData* stm_data, Locator **vboxes);
 void print_tr_state(int tr_state);
