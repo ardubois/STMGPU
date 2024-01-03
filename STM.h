@@ -3,10 +3,10 @@
 #include <assert.h>
 
 #define BACKOFF 200
-#define WriteSetSize	2
-#define ReadSetSize		2
+#define WriteSetSize	10
+#define ReadSetSize		10
 
-#define MAX_LOCATORS 200
+#define MAX_LOCATORS 500000
 
 #define ACTIVE      1
 #define COMMITTED   2

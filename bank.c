@@ -4,40 +4,84 @@
 
 #include <time.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #include "STM.h"
 #include <stdlib.h>
 #include <pthread.h>
 
+typedef struct Statistics_
+{
+	int nbCommits;
+	int nbAbortsRecordAge;
+	int nbAbortsReadWrite;
+	int nbAbortsWriteWrite;
+	int nbAbortsDataAge;
+} Statistics;
+
+typedef struct times_
+{
+	long long int total;
+	long long int runtime;
+	long long int commit;
+	long long int dataWrite;
+	long long int val1;
+	long long int val2;
+	long long int recordWrite;
+	long long int wastedTime;
+	long int comparisons;
+	long int nbReadOnly;
+	long int nbUpdates;	
+} time_rate;
+
+#define RAND_R_FNC(seed) ({ \
+    uint64_t next = seed; \
+    uint64_t result; \
+    next *= 1103515245; \
+    next += 12345; \
+    result = (uint64_t) (next / 65536) % 2048; \
+    next *= 1103515245; \
+    next += 12345; \
+    result <<= 10; \
+    result ^= (uint64_t) (next / 65536) % 1024; \
+    next *= 1103515245; \
+    next += 12345; \
+    result <<= 10; \
+    result ^= (uint64_t) (next / 65536) % 1024; \
+    seed = next; \
+    result; \
+})
+
 int *flag;
 
-#define KERNEL_DURATION 5
+#define KERNEL_DURATION 1
 #define DISJOINT 0
 
-__forceinline__ __device__ unsigned get_lane_id() {
-	unsigned ret;
-	asm volatile ("mov.u32 %0, %laneid;" : "=r"(ret));
-	return ret;
-}
 
 
-__device__ int waitMem;
+int waitMem;
 
-__global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned int roSize, unsigned int txSize, unsigned int dataSize, 
-								unsigned int threadNum, VertionedDataItem* data, TXRecord* record, TMmetadata* metadata, Statistics* stats, time_rate* times)
+void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned int roSize, unsigned int txSize, unsigned int dataSize, 
+								unsigned int threadNum, STMData* stm_data, Statistics* stats, time_rate* times)
 {
-	local_metadata txData;
-	bool result;
+	//bool result;
 
-	int id = threadIdx.x + blockIdx.x * blockDim.x;
+	
 	long mod = 0xFFFF;
 	long rnd;
 	long probRead;// = prRead * 0xFFFF;
 
+    TX_Data* tx_data = TX_Init(stm_data);
+    int id =  tx_data -> tr_id; 
+
 	uint64_t state = seed+id;
 	
 	int value=0;
-	int addr;
+	int read;
+	int  addr1, addr2;
 	//profile metrics
 	long long int start_time_commit, stop_time_commit;
 	long long int start_time_tx, stop_time_tx;
@@ -57,36 +101,35 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 		waitMem = *flag;
 		wastedTime=0;
 		///////
-		//decide whether the thread will do update or read-only tx
-		if(get_lane_id()==0)
-		{
 			rnd = RAND_R_FNC(state) & mod;
-		}
-		rnd = __shfl_sync(0xffffffff, rnd, 0);
+       
 		probRead = prRead * 0xFFFF;
-		///////
-		start_time_total = clock64();
+        printf("pread %d\n",probRead);
+///////
+		start_time_total = clock();
 		do
 		{	
-			start_time_tx = clock64();
-			TXBegin(*metadata, &txData);
+			start_time_tx = clock();
+			TX_Start(stm_data,tx_data);
 			
 			//Read-Only TX
 			if(rnd < probRead)
 			{
 				value=0;
-				for(int i=0; i<dataSize && txData.isAborted==false; i++)//for(int i=0; i<roSize && txData.isAborted==false; i++)//
+				for(int i=0; i<roSize && stm_data->tr_state[tx_data->tr_id] != ABORTED; i++)//for(int i=0; i<roSize && txData.isAborted==false; i++)//
 				{
-			#if DISJOINT					
-					addr = RAND_R_FNC(state)%(max-min+1) + min;
-			#else
-					addr = RAND_R_FNC(state)%dataSize;
-			#endif
-					value+=TXReadOnly(data, i, &txData);
-				}
-				if(txData.isAborted==true)
+			
+					addr1 = RAND_R_FNC(state)%dataSize;
+					read=TX_Open_Read(stm_data,tx_data,addr1);
+					if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
+					{
+						value += read;
+					}
+				}	
+				if(stm_data->tr_state[tx_data->tr_id] == ABORTED)
 				{
-					atomicAdd(&(stats->nbAbortsDataAge), 1);
+					TX_abort_tr(stm_data,tx_data);
+					__sync_add_and_fetch(&(stats->nbAbortsDataAge), 1);
 					continue;
 				}
 				//if(value != 10*dataSize)
@@ -95,55 +138,44 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 			//Update TX
 			else
 			{
-/*				for(int i=0; i<max(txSize,roSize) && txData.isAborted==false; i++)
-				{
-			#if DISJOINT					
-					addr = RAND_R_FNC(state)%(max-min+1) + min;
-			#else
-					addr = RAND_R_FNC(state)%dataSize;
-			#endif
-					if(i<roSize)
-						value = TXRead(data, addr, &txData);
-					if(i<txSize)
-						TXWrite(data, value+(1), addr, &txData);
-*/
-				for(int i=0; i<txSize && txData.isAborted==false; i++)
-				{
-			#if DISJOINT					
-					addr = RAND_R_FNC(state)%(max-min+1) + min;
-			#else
-					addr = RAND_R_FNC(state)%dataSize;
-			#endif
-					value = TXRead(data, addr, &txData); 
-					TXWrite(data, value-(1), addr, &txData);	
 
-			#if DISJOINT					
-					addr = RAND_R_FNC(state)%(max-min+1) + min;
-			#else
-					addr = RAND_R_FNC(state)%dataSize;
-			#endif
-					value = TXRead(data, addr, &txData); 
-					TXWrite(data, value+(1), addr, &txData);
-				}
-				if(txData.isAborted==true)
+				for(int i=0; i<txSize && stm_data->tr_state[tx_data->tr_id] != ABORTED; i++)
 				{
-					atomicAdd(&(stats->nbAbortsDataAge), 1);
+					addr1 = RAND_R_FNC(state)%dataSize;
+					addr2 = RAND_R_FNC(state)%dataSize;
+					printf("Address %d %d txsize %d!!!!!!!!!!!\n",addr1,addr2,txSize);
+					int* ptr1 = TX_Open_Write(stm_data,tx_data,addr1);
+            		if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
+            		{
+                		int* ptr2 = TX_Open_Write(stm_data,tx_data,addr2);
+                		if(ptr2 !=0 )
+                		{
+                    		*ptr1 -= 1;
+                    		*ptr2 += 1;
+                        }
+				    }
+				}
+				if(stm_data->tr_state[tx_data->tr_id] == ABORTED)
+				{
+					TX_abort_tr(stm_data,tx_data);
+					__sync_add_and_fetch(&(stats->nbAbortsDataAge), 1);
 					continue;
 				}
 			}
-			start_time_commit = clock64(); 
-  			result=TXCommit(id,record,data,metadata,txData,stats,times);
-  			stop_time_commit = clock64();
-  			if(!result)
+			start_time_commit = clock(); 
+  			TX_commit(stm_data,tx_data);
+  			stop_time_commit = clock();
+  			if(stm_data->tr_state[tx_data->tr_id] == ABORTED)
 			{
-				stop_aborted_tx = clock64();
+				stop_aborted_tx = clock();
 				wastedTime += stop_aborted_tx - start_time_tx;
 			}
-			stop_time_tx = clock64();
+			stop_time_tx = clock();
 		}
-		while(!result);
-		atomicAdd(&(stats->nbCommits), 1);
-		if(txData.ws.size==0)
+		while(stm_data->tr_state[tx_data->tr_id] != COMMITTED);
+		printf("commited\n!!!!!!!!!!!!!!!!!!!");
+		__sync_add_and_fetch(&(stats->nbCommits), 1);
+		if(tx_data -> write_set.size==0)
 			reads++;
 		else
 			updates++;		
@@ -262,7 +294,6 @@ int main(int argc, char *argv[])
 	unsigned int blockNum, threads_per_block, roSize, threadSize, dataSize, seed, verbose;
 	float prRead;
 
-	VertionedDataItem *h_data;
 	STMData* metadata;  
 	
 	Statistics *h_stats;
@@ -295,9 +326,9 @@ int main(int argc, char *argv[])
 	threadSize			= atoi(argv[argCnt++]);
 	verbose				= atoi(argv[argCnt++]);
 
-#if DISJOINT
-	dataSize=100*blockNum*threads_per_block;
-#endif
+//#if DISJOINT
+//	dataSize=100*blockNum*threads_per_block;
+//#endif
 	
 	int total_threads = blockNum*threads_per_block;
 	h_times = (time_rate*) calloc(total_threads,sizeof(time_rate));
@@ -308,36 +339,33 @@ int main(int argc, char *argv[])
     init_locators(stm_data,total_threads,MAX_LOCATORS);
 
 	float tKernel_ms = 0.0, totT_ms = 0.0;
-	cudaEvent_t start, stop;
-	cudaEventCreate(&start);
-	cudaEventCreate(&stop);
+	//cudaEvent_t start, stop;
+	//cudaEventCreate(&start);
+	//cudaEventCreate(&stop);
 
-	
-  	CUDA_CHECK_ERROR(cudaMallocManaged(&flag, sizeof(int)), "Could not alloc");
+	printf("aqui.\n");
+	flag = calloc(1,sizeof(int));
   	*flag = 0;
 
-	cudaEventRecord(start); 
-	bank_kernel<<<gridDist, blockDist>>>(flag, seed, prRead, roSize, threadSize, dataSize, blockNum*threads_per_block, d_data, records, metadata, d_stats, d_times);
-  	cudaEventRecord(stop);
+	//cudaEventRecord(start); 
+	printf("aqui.\n");
+	bank_kernel(flag, seed, prRead, roSize, threadSize, dataSize, blockNum*threads_per_block, stm_data, h_stats, h_times);
+  	//cudaEventRecord(stop);
 		
 	//sleep for a set time to let the kernel run
 	sleep(KERNEL_DURATION);
 	//send termination message to the kernel and wait for a return
 	__atomic_fetch_add(flag, 1, __ATOMIC_ACQ_REL);
 
-	CUDA_CHECK_ERROR(cudaEventSynchronize(stop), "in kernel");
-  	
-  	cudaEventElapsedTime(&tKernel_ms, start, stop);
+  	//cudaEventElapsedTime(&tKernel_ms, start, stop);
 	totT_ms += tKernel_ms;
-
+    int peak_clk=1;
   	
   	getKernelOutput(h_stats, h_times, blockNum*threads_per_block, peak_clk, totT_ms, verbose);
-	TXEnd(dataSize, h_data, &d_data, &records, &metadata);
+	//TXEnd(dataSize, h_data, &d_data, &records, &metadata);
 
 	free(h_stats);
 	free(h_times);
-	cudaFree(d_stats);
-	cudaFree(d_times);
 	
 	return 0;
 }

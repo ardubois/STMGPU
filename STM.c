@@ -67,6 +67,7 @@ Locator* TX_new_locator(STMData* stm_data, TX_Data* tx_data)
   if(tx_data -> next_locator == MAX_LOCATORS)
     {
      printf("Max locators reached!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+     print_stats(stm_data);
      exit(0);
     }
   return locator;
@@ -147,6 +148,10 @@ int TX_commit(STMData* stm_data, TX_Data* tx_data)
 
 int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
 {
+  Locator *locator = stm_data -> vboxes[object];
+  if (locator -> owner == tx_data->tr_id)
+      return locator -> new_version;
+
    while (stm_data->tr_state[tx_data->tr_id] != ABORTED)
    {
       Locator *locator = stm_data -> vboxes[object];
@@ -449,6 +454,7 @@ void print_locator(STMData* stm_data,Locator *locator)
 void print_stats(STMData* stm_data)
 {
   int size = stm_data -> num_tr;
+  printf("size: %d",size);
   TX_Data* tx_data = stm_data -> tx_data;
   int aborted = 0 ;
   int committed = 0;
