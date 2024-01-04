@@ -1,6 +1,6 @@
 all: teste1 teste2 teste3 teste4
 
-debug: dstm dteste1 dteste2
+debug: dstm dteste1 dteste2 dteste4
 
 bank: STM.o
 	gcc -o bank bank.c STM.o
@@ -20,6 +20,8 @@ teste1: stm
 stm: STM.c 
 	gcc -fPIC -o STM.o -c STM.c
 
+dteste4: STM.o
+	gcc -g -o teste4 teste4.c STM.o
 dteste2: STM.o
 	gcc -g -o teste2 teste2.c STM.o
 

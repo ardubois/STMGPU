@@ -40,7 +40,7 @@ void* foo(void* p){
                     if(stm_data->tr_state[tx_data->tr_id] == COMMITTED)
                         {trans ++;
                           pthread_barrier_wait(&barrier);
-                         // TX_garbage_collect(stm_data,tx_data);
+                          TX_garbage_collect(stm_data,tx_data);
                           pthread_barrier_wait(&barrier);
                         }
                 }
@@ -86,7 +86,7 @@ int main()
     pthread_join(threads[i],NULL);
    }
 
-  
+  printf("FIM!\n");
   print_stats(stm_data);
   
   

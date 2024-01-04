@@ -68,6 +68,7 @@ void TX_Start(STMData* stm_data, TX_Data* d)
 
 void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
 {
+  assert(tx_data -> next_locator<100);
   int used_locators[WriteSetSize];
   int used_pos = 0;
   tx_data -> next_locator--;
@@ -81,10 +82,14 @@ void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
     {
       if(tx_data->write_set.locators[i] == locator)
       {
+        if(stm_data -> vboxes[tx_data -> write_set.objects[i]] == locator)
+        {
           found = 1;
           used_locators[used_pos] = next_locator;
           used_pos ++;
           break;
+        } else
+          {break;}
       }
     }
     if(found)
@@ -97,11 +102,14 @@ void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
     }
     
   } while(next>=0);
+    assert(tx_data -> next_locator<100);
     int pos_queue = tx_data -> next_locator;
     tx_data -> next_locator ++;
+    //printf("next: %d  used: %d\n",tx_data -> next_locator,used_pos);
     assert(tx_data -> next_locator == used_pos);
     used_pos--;
-    while(pos_queue > 0)
+    assert(used_pos == pos_queue);
+    while(pos_queue >= 0)
     {
       tx_data -> locator_queue [pos_queue] = used_locators[used_pos];
       pos_queue --;
@@ -268,6 +276,7 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
             WriteSet* write_set = &tx_data-> write_set;
             int size = tx_data-> write_set.size;
             write_set -> locators[size] = new_locator;
+            write_set -> objects[size] = object;
             write_set -> size ++;
           
              
@@ -517,7 +526,7 @@ void print_locator(STMData* stm_data,Locator *locator)
 void print_stats(STMData* stm_data)
 {
   int size = stm_data -> num_tr;
-  printf("size: %d",size);
+  printf("size: %d\n",size);
   TX_Data* tx_data = stm_data -> tx_data;
   int aborted = 0 ;
   int committed = 0;

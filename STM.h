@@ -30,13 +30,14 @@ typedef struct readSet_
 typedef struct writeSet_
 {
     unsigned short size;
+    int objects[WriteSetSize];
     Locator* locators[WriteSetSize];
 } WriteSet;
 
 typedef struct TX_Data_
 {
     unsigned int tr_id;
-    unsigned short next_locator;
+    int next_locator;
     int* locator_queue;
     ReadSet read_set;
     WriteSet write_set;
