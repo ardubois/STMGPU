@@ -70,6 +70,7 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object);
 int TX_Open_Read(STMData* stm_data, TX_Data* tx_data, uint object);
 void TX_abort_tr(STMData* stm_data, TX_Data* tx_data);
 int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy);
+void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data);
 
 void init_locators(STMData* stm_data,int num_tx, int num_locators);
 void init_objects(STMData* stm_data,int num_objects, int value);

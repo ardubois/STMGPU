@@ -66,7 +66,48 @@ void TX_Start(STMData* stm_data, TX_Data* d)
     stm_data -> tr_state[d->tr_id] = ACTIVE;
 }
 
-
+void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
+{
+  int used_locators[WriteSetSize];
+  int used_pos = 0;
+  tx_data -> next_locator--;
+  int next = tx_data -> next_locator;
+  do {
+    int found = 0;
+    
+    int next_locator = tx_data -> locator_queue [next];
+    Locator* locator = &stm_data -> locators[next_locator]; 
+    for(int i=0;i<tx_data->write_set.size;i++)
+    {
+      if(tx_data->write_set.locators[i] == locator)
+      {
+          found = 1;
+          used_locators[used_pos] = next_locator;
+          used_pos ++;
+          break;
+      }
+    }
+    if(found)
+    {
+      next --;
+    } else {
+      tx_data -> locator_queue [tx_data -> next_locator] = next_locator;
+      tx_data -> next_locator --;
+      next --;
+    }
+    
+  } while(next>=0);
+    int pos_queue = tx_data -> next_locator;
+    tx_data -> next_locator ++;
+    assert(tx_data -> next_locator == used_pos);
+    used_pos--;
+    while(pos_queue > 0)
+    {
+      tx_data -> locator_queue [pos_queue] = used_locators[used_pos];
+      pos_queue --;
+      used_pos --;
+    }
+}
 Locator* TX_new_locator(STMData* stm_data, TX_Data* tx_data)
 {
   int next_locator = tx_data -> locator_queue [tx_data->next_locator];
