@@ -33,8 +33,11 @@ TX_Data* TX_Init(STMData* stm_data)
    
 
     TX_Data *d = &stm_data -> tx_data[tx_id];
+    int numLocators = stm_data -> num_locators;
+
     d-> tr_id = tx_id;
     d-> next_locator = 0;
+    d -> locator_queue = malloc(numLocators * sizeof(int));
     d -> read_set.size =0;
     d -> write_set.size = 0;
     d -> n_aborted = 0;
@@ -42,6 +45,11 @@ TX_Data* TX_Init(STMData* stm_data)
     d -> cm_enemy = -1;
     d -> cm_aborts = 0;
     stm_data -> tr_state[d->tr_id] = ACTIVE;
+
+    for(int i = 0; i<numLocators;i++)
+    {
+      d->locator_queue[i] = (tx_id * stm_data -> num_locators) + i;
+    }
 
     return d;
 }
@@ -61,6 +69,18 @@ void TX_Start(STMData* stm_data, TX_Data* d)
 
 Locator* TX_new_locator(STMData* stm_data, TX_Data* tx_data)
 {
+  int next_locator = tx_data -> locator_queue [tx_data->next_locator];
+  Locator* locator = &stm_data -> locators[next_locator]; 
+  tx_data -> next_locator++;
+  if(tx_data -> next_locator == MAX_LOCATORS)
+    {
+     printf("Max locators reached!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+     print_stats(stm_data);
+     exit(0);
+    }
+  return locator;
+  
+  /*
   Locator* locator = stm_data -> locators;
   locator += (tx_data->tr_id * stm_data -> num_locators) + tx_data-> next_locator;
   tx_data -> next_locator++;
@@ -71,6 +91,8 @@ Locator* TX_new_locator(STMData* stm_data, TX_Data* tx_data)
      exit(0);
     }
   return locator;
+*/
+
 }
 
 int TX_validate_readset(STMData* stm_data, TX_Data* tx_data)

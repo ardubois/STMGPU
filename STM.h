@@ -6,7 +6,7 @@
 #define WriteSetSize	10
 #define ReadSetSize		10
 
-#define MAX_LOCATORS 500000
+#define MAX_LOCATORS 60
 
 #define ACTIVE      1
 #define COMMITTED   2
@@ -37,6 +37,7 @@ typedef struct TX_Data_
 {
     unsigned int tr_id;
     unsigned short next_locator;
+    int* locator_queue;
     ReadSet read_set;
     WriteSet write_set;
     unsigned short n_aborted;
