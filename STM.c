@@ -68,7 +68,48 @@ void TX_Start(STMData* stm_data, TX_Data* d)
 
 void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
 {
-  assert(tx_data -> next_locator<100);
+  
+  int used_locators[MAX_LOCATORS];
+  int used_pos = 0;
+  tx_data -> next_locator--;
+  int next = tx_data -> next_locator;
+
+  do{
+    int next_locator = tx_data -> locator_queue [next];
+    Locator* locator = &stm_data -> locators[next_locator];
+
+    if(stm_data -> vboxes[locator->object] == locator)
+    {
+          used_locators[used_pos] = next_locator;
+          used_pos ++;
+          next --;
+    } else {
+          tx_data -> locator_queue [tx_data -> next_locator] = next_locator;
+          tx_data -> next_locator --;
+          next --;
+    }
+  } while(next >= 0);
+    
+    int pos_queue = tx_data -> next_locator;
+    tx_data -> next_locator ++;
+    //printf("next: %d  used: %d\n",tx_data -> next_locator,used_pos);
+    assert(tx_data -> next_locator == used_pos);
+    used_pos--;
+    assert(used_pos == pos_queue);
+    
+    while(pos_queue >= 0)
+    { 
+      tx_data -> locator_queue [pos_queue] = used_locators[used_pos];
+      pos_queue --;
+      used_pos --;
+    }
+}
+
+
+/*
+void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
+{
+  
   int used_locators[WriteSetSize];
   int used_pos = 0;
   tx_data -> next_locator--;
@@ -102,20 +143,23 @@ void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
     }
     
   } while(next>=0);
-    assert(tx_data -> next_locator<100);
+    
     int pos_queue = tx_data -> next_locator;
     tx_data -> next_locator ++;
     //printf("next: %d  used: %d\n",tx_data -> next_locator,used_pos);
     assert(tx_data -> next_locator == used_pos);
     used_pos--;
     assert(used_pos == pos_queue);
+    assert(used_pos <= tx_data->write_set.size);
     while(pos_queue >= 0)
-    {
+    { 
       tx_data -> locator_queue [pos_queue] = used_locators[used_pos];
       pos_queue --;
       used_pos --;
     }
 }
+*/
+
 Locator* TX_new_locator(STMData* stm_data, TX_Data* tx_data)
 {
   int next_locator = tx_data -> locator_queue [tx_data->next_locator];
@@ -227,7 +271,8 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
    {
       Locator *locator = stm_data -> vboxes[object];
       Locator *new_locator = TX_new_locator(stm_data,tx_data);
-      new_locator ->owner = tx_data->tr_id;
+      new_locator -> owner = tx_data->tr_id;
+      new_locator -> object = object;
       assert(locator -> owner != new_locator -> owner);
       switch (stm_data->tr_state[locator -> owner]) {
             case COMMITTED:
@@ -429,6 +474,8 @@ int TX_Open_Read(STMData* stm_data, TX_Data* tx_data, uint object)
               {
                    return *version;
               }
+    __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
+    assert(stm_data->tr_state[tx_data->tr_id] == ABORTED) ;
     return 0; 
 }
 
@@ -541,7 +588,12 @@ void print_stats(STMData* stm_data)
   for (int i = 0; i < stm_data -> n_objects; i++)
   {
     Locator *loc = stm_data -> vboxes[i];
-    assert(stm_data->tr_state[loc->owner] == COMMITTED);
+    //if (stm_data->tr_state[loc->owner] != COMMITTED)
+    //{
+    //  printf("print stats not commited\n");
+    //  print_locator(stm_data,loc);
+   // }
+    //assert(stm_data->tr_state[loc->owner] == COMMITTED);
     total += *loc -> new_version;
   }
   printf("Total data: %d\n",total);

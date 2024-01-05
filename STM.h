@@ -6,7 +6,7 @@
 #define WriteSetSize	10
 #define ReadSetSize		10
 
-#define MAX_LOCATORS 60
+#define MAX_LOCATORS 110
 
 #define ACTIVE      1
 #define COMMITTED   2
@@ -15,6 +15,7 @@
 typedef struct Locator_
 {
 	unsigned int owner;
+    int object;
 	int* new_version;
 	int* old_version;
 } Locator;

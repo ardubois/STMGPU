@@ -29,6 +29,6 @@ dteste1: dstm
 	gcc -g -o teste1 teste1.c STM.o
 
 dstm: STM.c 
-	gcc -g -fPIC -o STM.o -c STM.c
+	gcc -g -fPIC -o STM.o -c STM.c 
 clean:
 	rm STM.o teste1 teste2

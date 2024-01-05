@@ -164,6 +164,12 @@ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned int roSize
 			}
 			start_time_commit = clock(); 
   			TX_commit(stm_data,tx_data);
+			if(stm_data->tr_state[tx_data->tr_id] == COMMITTED)
+                        {//trans ++;
+                          //pthread_barrier_wait(&barrier);
+                          TX_garbage_collect(stm_data,tx_data);
+                          //pthread_barrier_wait(&barrier);
+                        }
   			stop_time_commit = clock();
   			if(stm_data->tr_state[tx_data->tr_id] == ABORTED)
 			{
