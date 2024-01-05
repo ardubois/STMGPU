@@ -368,8 +368,8 @@ int TX_contention_manager6(STMData* stm_data, TX_Data* tx_data,unsigned int me, 
 int TX_contention_manager7(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
 
-  if(tx_data->cm_aborts > 5)
-  {
+  if(tx_data->cm_aborts > 10)
+  { tx_data->cm_aborts =0;
     return 1;
   } else {
     tx_data->cm_aborts ++;   
@@ -586,7 +586,7 @@ void print_stats(STMData* stm_data)
     aborted += tx_data[i].n_aborted;
     committed += tx_data[i].n_committed;
   }
-  printf("Total Aborts: %d Total Commits: %d\n", aborted, committed);
+  printf("\n\nTotal Aborts: %d Total Commits: %d\n\n\n", aborted, committed);
 
   int total = 0;
   for (int i = 0; i < stm_data -> n_objects; i++)

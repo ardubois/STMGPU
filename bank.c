@@ -125,11 +125,8 @@ void* bank_kernel(void *p)
 		waitMem = *flag;
 		wastedTime=0;
 		///////
-			rnd = RAND_R_FNC(state) & mod;
-       
-		probRead = prRead * 0xFFFF;
-        printf("pread %d\n",probRead);
-///////pthread_t threads[num_tx];
+			rnd = (RAND_R_FNC(seed) %10) +1;
+//        printf("rand %d  -  %d\n",rnd,txSize);
 
  
 		start_time_total = clock();
@@ -139,7 +136,7 @@ void* bank_kernel(void *p)
 			TX_Start(stm_data,tx_data);
 			
 			//Read-Only TX
-			if(rnd < probRead)
+			if(rnd <= probRead)
 			{
 				value=0;
 				for(int i=0; i<roSize && stm_data->tr_state[tx_data->tr_id] != ABORTED; i++)//for(int i=0; i<roSize && txData.isAborted==false; i++)//
@@ -428,6 +425,6 @@ int main(int argc, char *argv[])
 
 	free(h_stats);
 	free(h_times);
-	
+	//print_stats(stm_data);
 	return 0;
 }
