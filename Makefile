@@ -3,7 +3,7 @@ all: teste1 teste2 teste3 teste4
 debug: dstm dteste1 dteste2 dteste4
 
 bank: STM.o
-	gcc -o bank bank.c STM.o
+	gcc -g -o bank bank.c STM.o
 
 teste4: STM.o
 	gcc -o teste4 teste4.c STM.o

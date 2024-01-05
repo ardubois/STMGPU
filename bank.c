@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+pthread_barrier_t barrier;
+
 typedef struct Statistics_
 {
 	int nbCommits;
@@ -64,10 +66,36 @@ int *flag;
 
 int waitMem;
 
-void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned int roSize, unsigned int txSize, unsigned int dataSize, 
-								unsigned int threadNum, STMData* stm_data, Statistics* stats, time_rate* times)
+struct args {
+    int *flag;
+	unsigned int seed;
+	float prRead;
+	unsigned int roSize; 
+	unsigned int txSize; 
+	unsigned int dataSize; 
+	unsigned int threadNum; 
+	STMData* stm_data; 
+	Statistics* stats; 
+	time_rate* times;
+};
+
+
+void* bank_kernel(void *p)
 {
 	//bool result;
+
+	struct args* args = (struct args*) p;
+
+	int *flag = args -> flag;
+	unsigned int seed = args -> seed; 
+	float prRead =  args -> prRead;
+	unsigned int roSize = args -> roSize;
+	unsigned int txSize = args -> txSize;
+	unsigned int dataSize = args -> dataSize;
+    unsigned int threadNum = args -> threadNum;
+	STMData* stm_data = args -> stm_data;
+	Statistics* stats = args -> stats;
+	time_rate* times = args -> times;
 
 	
 	long mod = 0xFFFF;
@@ -90,11 +118,7 @@ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned int roSize
 
 	long int updates=0, reads=0;
 	//dijoint accesses variables
-#if DISJOINT
-	int min, max;
-	min = dataSize/threadNum*id;
-	max = dataSize/threadNum*(id+1)-1;
-#endif
+
 
 	while((*flag & 1)==0)
 	{
@@ -105,7 +129,9 @@ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned int roSize
        
 		probRead = prRead * 0xFFFF;
         printf("pread %d\n",probRead);
-///////
+///////pthread_t threads[num_tx];
+
+ 
 		start_time_total = clock();
 		do
 		{	
@@ -166,9 +192,9 @@ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned int roSize
   			TX_commit(stm_data,tx_data);
 			if(stm_data->tr_state[tx_data->tr_id] == COMMITTED)
                         {//trans ++;
-                          //pthread_barrier_wait(&barrier);
+                          pthread_barrier_wait(&barrier);
                           TX_garbage_collect(stm_data,tx_data);
-                          //pthread_barrier_wait(&barrier);
+                          pthread_barrier_wait(&barrier);
                         }
   			stop_time_commit = clock();
   			if(stm_data->tr_state[tx_data->tr_id] == ABORTED)
@@ -355,7 +381,37 @@ int main(int argc, char *argv[])
 
 	//cudaEventRecord(start); 
 	printf("aqui.\n");
-	bank_kernel(flag, seed, prRead, roSize, threadSize, dataSize, blockNum*threads_per_block, stm_data, h_stats, h_times);
+
+    struct args* args = calloc(1, sizeof(struct args));
+
+	args -> flag = flag;
+	args -> seed = seed;
+    args -> prRead =  prRead;
+	args -> roSize = roSize;
+	args ->  txSize = threadSize;
+    args -> dataSize = dataSize;
+	args ->  threadNum =  total_threads;
+	args -> stm_data = stm_data;
+	args -> stats = h_stats;
+	args -> times = h_times;
+
+	pthread_barrier_init(&barrier, NULL, total_threads);
+
+    pthread_t threads[total_threads];
+
+  for(int i=0; i< total_threads; i++)
+   {
+    pthread_create(&threads[i],NULL, bank_kernel, args);
+   }
+  
+  //pthread_create(&tid1, NULL, foo, stm_data); 
+  
+  //for(int i=0; i< total_threads; i++)
+   //{
+   // pthread_join(threads[i],NULL);
+  // }
+
+	//bank_kernel(args);
   	//cudaEventRecord(stop);
 		
 	//sleep for a set time to let the kernel run

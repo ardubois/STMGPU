@@ -68,31 +68,34 @@ void TX_Start(STMData* stm_data, TX_Data* d)
 
 void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
 {
-  
-  int used_locators[MAX_LOCATORS];
-  int used_pos = 0;
-  tx_data -> next_locator--;
-  int next = tx_data -> next_locator;
+  if(tx_data -> next_locator > 0)
+  {
+    int used_locators[MAX_LOCATORS];
+    int used_pos = 0;
+    tx_data -> next_locator--;
+    int next = tx_data -> next_locator;
 
-  do{
-    int next_locator = tx_data -> locator_queue [next];
-    Locator* locator = &stm_data -> locators[next_locator];
+    do{
+      int next_locator = tx_data -> locator_queue [next];
+      Locator* locator = &stm_data -> locators[next_locator];
 
-    if(stm_data -> vboxes[locator->object] == locator)
-    {
-          used_locators[used_pos] = next_locator;
-          used_pos ++;
-          next --;
-    } else {
-          tx_data -> locator_queue [tx_data -> next_locator] = next_locator;
-          tx_data -> next_locator --;
-          next --;
-    }
-  } while(next >= 0);
+      if(stm_data -> vboxes[locator->object] == locator)
+      {
+            used_locators[used_pos] = next_locator;
+            used_pos ++;
+            next --;
+      } else {
+            tx_data -> locator_queue [tx_data -> next_locator] = next_locator;
+            tx_data -> next_locator --;
+            next --;
+      }
+    } while(next >= 0);
     
     int pos_queue = tx_data -> next_locator;
     tx_data -> next_locator ++;
     //printf("next: %d  used: %d\n",tx_data -> next_locator,used_pos);
+    if(tx_data -> next_locator != used_pos)
+       printf("AQUI: next %d next_locator: %d used_pos %d\n",next,tx_data -> next_locator ,used_pos);
     assert(tx_data -> next_locator == used_pos);
     used_pos--;
     assert(used_pos == pos_queue);
@@ -103,6 +106,7 @@ void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
       pos_queue --;
       used_pos --;
     }
+  }
 }
 
 
