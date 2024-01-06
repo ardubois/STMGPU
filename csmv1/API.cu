@@ -471,6 +471,7 @@ __device__ void TXBegin(TMmetadata metadata, local_metadata* txData) //int* time
 	txData->rs.size=0;
 	txData->ws.size=0;
 	txData->isAborted=false;
+	printf("0TXISABORTED %d\n", txData->isAborted);
 }
 
 cudaError_t TXInit(TXRecord** d_records, TMmetadata** d_metadata)
