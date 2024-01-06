@@ -36,7 +36,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 	bool result;
 
 	int id = threadIdx.x + blockIdx.x * blockDim.x;
-	long mod = 0xFFFF;
+	//long mod = 0xFFFF;
 	long rnd;
 	long probRead;// = prRead * 0xFFFF;
 
@@ -204,7 +204,7 @@ void getKernelOutput(Statistics *h_stats, time_rate *h_times, uint threadNum, in
 
 	int nbAborts = h_stats->nbAbortsDataAge + h_stats->nbAbortsRecordAge + h_stats->nbAbortsReadWrite;
 
-	
+	printf("--- nbaborts:  %d nbcommits: %d\n\n----------",h_stats->nbAbortsDataAge,h_stats->nbCommits);
 	if(verbose)
 		printf("AbortPercent\t%f %%\nThroughtput\t%f\n\nAbortDataAge\t%f %%\nAbortRecAge\t%f %%\nAbortReadWrite\t%f %%\nAbortPreVal\t%f %%\n\nTotal\t\t%f\nRuntime\t\t%f\nCommit\t\t%f\t%.2f%%\nWaitTime\t%f\t%.2f%%\nPreValidation\t%f\t%.2f%%\n1stValidation\t%f\t%.2f%%\nRecInsertVals\t%f\t%.2f%%\nRecInsert\t%f\t%.2f%%\nWriteBack\t%f\t%.2f%%\nWaste\t\t%f\n\nComparisons\t%f\nTotalUpdates\t%d\nTotalReads\t%d\n", 
 			(float)nbAborts/(nbAborts+h_stats->nbCommits)*100.0,
