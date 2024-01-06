@@ -115,6 +115,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 */
 printf("txsize: %d\n",txSize);
 printf("TXISABORTED %d", txData.isAborted);
+result =0;
 				for(int i=0; i<txSize && txData.isAborted==false; i++)
 				{
 					addr = RAND_R_FNC(state)%dataSize;
