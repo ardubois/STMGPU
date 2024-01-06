@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #ifndef MaxWriteSetSize
-#define MaxWriteSetSize 2
+#define MaxWriteSetSize 1000
 #endif // MaxWriteSetSize
 
 #ifndef MaxReadSetSize
