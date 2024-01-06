@@ -330,7 +330,7 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
           
              
             if(TX_validate_readset(stm_data,tx_data))
-              {print_locator(stm_data,new_locator);
+              {//print_locator(stm_data,new_locator);
                return new_locator->new_version;
               }
             else

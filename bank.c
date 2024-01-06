@@ -59,7 +59,7 @@ typedef struct times_
 
 int *flag;
 
-#define KERNEL_DURATION 1
+#define KERNEL_DURATION 5
 #define DISJOINT 0
 
 
@@ -166,7 +166,7 @@ void* bank_kernel(void *p)
 				{
 					addr1 = RAND_R_FNC(state)%dataSize;
 					addr2 = RAND_R_FNC(state)%dataSize;
-					printf("Address %d %d txsize %d!!!!!!!!!!!\n",addr1,addr2,txSize);
+					//printf("Address %d %d txsize %d!!!!!!!!!!!\n",addr1,addr2,txSize);
 					int* ptr1 = TX_Open_Write(stm_data,tx_data,addr1);
             		if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
             		{
@@ -202,7 +202,7 @@ void* bank_kernel(void *p)
 			stop_time_tx = clock();
 		}
 		while(stm_data->tr_state[tx_data->tr_id] != COMMITTED);
-		printf("commited\n!!!!!!!!!!!!!!!!!!!");
+		//printf("commited\n!!!!!!!!!!!!!!!!!!!");
 		__sync_add_and_fetch(&(stats->nbCommits), 1);
 		if(tx_data -> write_set.size==0)
 			reads++;
@@ -372,12 +372,12 @@ int main(int argc, char *argv[])
 	//cudaEventCreate(&start);
 	//cudaEventCreate(&stop);
 
-	printf("aqui.\n");
+	//printf("aqui.\n");
 	flag = calloc(1,sizeof(int));
   	*flag = 0;
 
 	//cudaEventRecord(start); 
-	printf("aqui.\n");
+//	printf("aqui.\n");
 
     struct args* args = calloc(1, sizeof(struct args));
 
@@ -425,6 +425,6 @@ int main(int argc, char *argv[])
 
 	free(h_stats);
 	free(h_times);
-	//print_stats(stm_data);
+	print_stats(stm_data);
 	return 0;
 }
