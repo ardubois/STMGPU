@@ -114,7 +114,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 						TXWrite(data, value+(1), addr, &txData);
 */
 printf("txsize: %d\n",txSize);
-printf("TXISABORTED %d", txData.isAborted);
+printf("TXISABORTED %d\n", txData.isAborted);
 result =0;
 				for(int i=0; i<txSize && txData.isAborted==false; i++)
 				{
