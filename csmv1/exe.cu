@@ -123,6 +123,7 @@ printf("txsize: %d\n",txSize);
 			#endif
 					value = TXRead(data, addr, &txData); 
 					TXWrite(data, value-(1), addr, &txData);	
+					printf("1tx ws size %d\n",txData.ws.size);
 
 			#if DISJOINT					
 					addr = RAND_R_FNC(state)%(max-min+1) + min;
@@ -131,6 +132,7 @@ printf("txsize: %d\n",txSize);
 			#endif
 					value = TXRead(data, addr, &txData); 
 					TXWrite(data, value+(1), addr, &txData);
+					printf("2tx ws size %d\n",txData.ws.size);
 				}
 				if(txData.isAborted==true)
 				{
@@ -141,6 +143,7 @@ printf("txsize: %d\n",txSize);
 			start_time_commit = clock64(); 
 			//printf("tx ws size %d\n",txData.ws.size);
   			result=TXCommit(id,record,data,metadata,txData,stats,times);
+			printf("3tx ws size %d\n",txData.ws.size);
   			stop_time_commit = clock64();
   			if(!result)
 			{
