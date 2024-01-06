@@ -79,7 +79,7 @@ __device__ bool TXWrite(VertionedDataItem* data, int value, int addr, local_meta
 	txData->ws.addrs[txData->ws.size] = addr;
 	txData->ws.value[txData->ws.size] = value;
 	txData->ws.size++;
-    printf("tx ws size %d\n",txData->ws.size);
+    //Sprintf("tx ws size %d\n",txData->ws.size);
 	return true;
 }
 
@@ -470,6 +470,7 @@ __device__ void TXBegin(TMmetadata metadata, local_metadata* txData) //int* time
 	txData->timestamp = metadata.globalClock;
 	txData->rs.size=0;
 	txData->ws.size=0;
+	txData->isAborted=false;
 }
 
 cudaError_t TXInit(TXRecord** d_records, TMmetadata** d_metadata)
