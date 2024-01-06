@@ -79,6 +79,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 			//Read-Only TX
 			if(rnd <= probRead)
 			{
+				printf("rnd %d probread %d\n", rnd, probRead);
 				value=0;
 				for(int i=0; i<roSize && txData.isAborted==false; i++)//for(int i=0; i<roSize && txData.isAborted==false; i++)//
 				{
