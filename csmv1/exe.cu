@@ -75,9 +75,9 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 		{	
 			start_time_tx = clock64();
 			TXBegin(*metadata, &txData);
-            printf("1TXISABORTED %d\n", txData.isAborted);			
+            //printf("1TXISABORTED %d\n", txData.isAborted);			
 			//Read-Only TX
-			if(0)//if(rnd <= probRead)
+			if(1)//if(rnd <= probRead)
 			{
 				printf("rnd %d probread %d\n", rnd, probRead);
 				value=0;
@@ -113,23 +113,23 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 					if(i<txSize)
 						TXWrite(data, value+(1), addr, &txData);
 */
-printf("txsize: %d\n",txSize);
+//printf("txsize: %d\n",txSize);
 //printf("TXISABORTED %d\n", txData.isAborted);
-printf("true %d\n", true);
-printf("false %d\n", false);
+//printf("true %d\n", true);
+//printf("false %d\n", false);
 result =0;
-printf("2TXISABORTED %d\n", txData.isAborted);
+//printf("2TXISABORTED %d\n", txData.isAborted);
 				for(int i=0; i<txSize && txData.isAborted==false; i++)
 				{
 					addr = RAND_R_FNC(state)%dataSize;
 					value = TXRead(data, addr, &txData); 
 					TXWrite(data, value-(1), addr, &txData);	
-					printf("1tx ws size %d\n",txData.ws.size);
+				//	printf("1tx ws size %d\n",txData.ws.size);
 
 					addr = RAND_R_FNC(state)%dataSize;
 					value = TXRead(data, addr, &txData); 
 					TXWrite(data, value+(1), addr, &txData);
-					printf("2tx ws size %d\n",txData.ws.size);
+				//	printf("2tx ws size %d\n",txData.ws.size);
 				}
 				if(txData.isAborted==true)
 				{
