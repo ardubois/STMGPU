@@ -69,7 +69,7 @@ int waitMem;
 struct args {
     int *flag;
 	unsigned int seed;
-	float prRead;
+	int prRead;
 	unsigned int roSize; 
 	unsigned int txSize; 
 	unsigned int dataSize; 
@@ -88,7 +88,7 @@ void* bank_kernel(void *p)
 
 	int *flag = args -> flag;
 	unsigned int seed = args -> seed; 
-	float prRead =  args -> prRead;
+	int prRead =  args -> prRead;
 	unsigned int roSize = args -> roSize;
 	unsigned int txSize = args -> txSize;
 	unsigned int dataSize = args -> dataSize;
@@ -100,7 +100,7 @@ void* bank_kernel(void *p)
 	
 	long mod = 0xFFFF;
 	long rnd;
-	long probRead;// = prRead * 0xFFFF;
+	long probRead=prRead;// = prRead * 0xFFFF;
 
     TX_Data* tx_data = TX_Init(stm_data);
     int id =  tx_data -> tr_id; 
@@ -127,7 +127,7 @@ void* bank_kernel(void *p)
 		///////
 			rnd = (RAND_R_FNC(seed) %10) +1;
 //        printf("rand %d  -  %d\n",rnd,txSize);
-
+        printf("rnd %d probread %d\n", rnd, probRead);
  
 		start_time_total = clock();
 		do
@@ -161,7 +161,7 @@ void* bank_kernel(void *p)
 			//Update TX
 			else
 			{
-
+                  printf("write!\n");
 				for(int i=0; i<txSize && stm_data->tr_state[tx_data->tr_id] != ABORTED; i++)
 				{
 					addr1 = RAND_R_FNC(state)%dataSize;
@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
 	dataSize			= atoi(argv[argCnt++]);
 	threads_per_block	= atoi(argv[argCnt++]);
 	blockNum		 	= atoi(argv[argCnt++]);
-	prRead 				= (atoi(argv[argCnt++])/100.0);
+	prRead 				= atoi(argv[argCnt++]);
 	roSize 				= atoi(argv[argCnt++]);
 	threadSize			= atoi(argv[argCnt++]);
 	verbose				= atoi(argv[argCnt++]);
