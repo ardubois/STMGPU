@@ -116,20 +116,12 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 printf("txsize: %d\n",txSize);
 				for(int i=0; i<txSize && txData.isAborted==false; i++)
 				{
-			#if DISJOINT					
-					addr = RAND_R_FNC(state)%(max-min+1) + min;
-			#else
 					addr = RAND_R_FNC(state)%dataSize;
-			#endif
 					value = TXRead(data, addr, &txData); 
 					TXWrite(data, value-(1), addr, &txData);	
 					printf("1tx ws size %d\n",txData.ws.size);
 
-			#if DISJOINT					
-					addr = RAND_R_FNC(state)%(max-min+1) + min;
-			#else
 					addr = RAND_R_FNC(state)%dataSize;
-			#endif
 					value = TXRead(data, addr, &txData); 
 					TXWrite(data, value+(1), addr, &txData);
 					printf("2tx ws size %d\n",txData.ws.size);
