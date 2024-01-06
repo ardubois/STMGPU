@@ -75,7 +75,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 		{	
 			start_time_tx = clock64();
 			TXBegin(*metadata, &txData);
-			
+            printf("1TXISABORTED %d\n", txData.isAborted);			
 			//Read-Only TX
 			if(0)//if(rnd <= probRead)
 			{
@@ -114,10 +114,11 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 						TXWrite(data, value+(1), addr, &txData);
 */
 printf("txsize: %d\n",txSize);
-printf("TXISABORTED %d\n", txData.isAborted);
+//printf("TXISABORTED %d\n", txData.isAborted);
 printf("true %d\n", true);
 printf("false %d\n", false);
 result =0;
+printf("2TXISABORTED %d\n", txData.isAborted);
 				for(int i=0; i<txSize && txData.isAborted==false; i++)
 				{
 					addr = RAND_R_FNC(state)%dataSize;
