@@ -79,7 +79,7 @@ __device__ bool TXWrite(VertionedDataItem* data, int value, int addr, local_meta
 	txData->ws.addrs[txData->ws.size] = addr;
 	txData->ws.value[txData->ws.size] = value;
 	txData->ws.size++;
-
+    printf("tx ws size %d\n",txData->ws.size);
 	return true;
 }
 
