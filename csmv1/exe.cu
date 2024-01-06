@@ -160,6 +160,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 		times[id].wastedTime	 += wastedTime;
 
 	}
+	printf("reads %d updates %d", reads,updates);
 	times[id].nbReadOnly = reads;
 	times[id].nbUpdates  = updates;
 }
