@@ -33,7 +33,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 								unsigned int threadNum, VertionedDataItem* data, TXRecord* record, TMmetadata* metadata, Statistics* stats, time_rate* times)
 {
 	local_metadata txData;
-	bool result;
+	bool result=false;
 
 	int id = threadIdx.x + blockIdx.x * blockDim.x;
 	//long mod = 0xFFFF;
