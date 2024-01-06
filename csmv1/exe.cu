@@ -113,6 +113,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 					if(i<txSize)
 						TXWrite(data, value+(1), addr, &txData);
 */
+printf("txsize: %d\n",txSize);
 				for(int i=0; i<txSize && txData.isAborted==false; i++)
 				{
 			#if DISJOINT					
@@ -138,7 +139,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 				}
 			}
 			start_time_commit = clock64(); 
-			printf("tx ws size %d\n",txData.ws.size);
+			//printf("tx ws size %d\n",txData.ws.size);
   			result=TXCommit(id,record,data,metadata,txData,stats,times);
   			stop_time_commit = clock64();
   			if(!result)
