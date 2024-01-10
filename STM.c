@@ -329,7 +329,7 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
       {
          if(__sync_bool_compare_and_swap(&stm_data -> vboxes[object],addr_locator ,addr_new_locator)){
             //printf("CAS\n");
-            print_locator(stm_data,new_locator);
+            //print_locator(stm_data,new_locator);
             WriteSet* write_set = &tx_data-> write_set;
             int size = tx_data-> write_set.size;
             write_set -> locators[size] = addr_new_locator;
