@@ -22,7 +22,19 @@ STMData* STM_start(int numObjects, int numTransactions, int numLocators)
     return meta_data;
 }
 
-STMData* STM_copy(STMData* stm_data)
+void STM_copy_from_device(STMData* d_stm_data, STMData* stm_data)
+{
+    int numObjects = stm_data -> n_objects;
+    int numTransactions = stm_data -> num_tr;
+    int numLocators = stm_data -> num_locators;
+   
+    cudaMemcpy(stm_data->vboxes, d_stm_data->vboxes, numObjects * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(stm_data->tr_state, d_stm_data->tr_state, numTransactions * sizeof(int)+2, cudaMemcpyDeviceToHost);
+    cudaMemcpy( stm_data->locators, d_stm_data->locators, (numObjects + (numLocators * numTransactions)) * sizeof(Locator), cudaMemcpyDeviceToHost);
+    cudaMemcpy(stm_data->locators_data, d_stm_data->locators_data,((2*numObjects)+(2*numLocators * numTransactions)) * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(stm_data->tx_data, d_stm_data->tx_data,numTransactions * sizeof(TX_Data), cudaMemcpyDeviceToHost);
+}
+STMData* STM_copy_to_device(STMData* stm_data)
 {
     int numObjects = stm_data -> n_objects;
     int numTransactions = stm_data -> num_tr;
