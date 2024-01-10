@@ -32,7 +32,7 @@ void* foo(void* p){
                     if(*ptr1 > 10)
                     {
                     *ptr1 -= 10;
-                    *ptr2 += 10;
+                    *ptr2 += 20;
                     }
                     TX_commit(stm_data,tx_data);
                     if(stm_data->tr_state[tx_data->tr_id] == COMMITTED)
@@ -58,7 +58,7 @@ int main()
 {
   int num_objects = N_OBJECTS;
   int num_locators = MAX_LOCATORS;
-  int num_tx = 100;
+  int num_tx = 1000;
  
   STMData* stm_data = STM_start(num_objects, num_tx, num_locators); 
   init_objects(stm_data,num_objects,100);

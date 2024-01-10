@@ -8,7 +8,7 @@ void* foo(void* p){
    
    STMData* stm_data = (STMData*) p;
    TX_Data* tx_data = TX_Init(stm_data);
-
+  
    int o1 = rand() % (N_OBJECTS -1);
    int o2;
    do{
@@ -20,6 +20,7 @@ void* foo(void* p){
    do{
       TX_Start(stm_data,tx_data);
       aborted = 0;
+      
       int* ptr1 = TX_Open_Write(stm_data,tx_data,o1);
       if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
       {
@@ -29,8 +30,11 @@ void* foo(void* p){
           if(*ptr1 > 10)
           {
             *ptr1 -= 10;
-            *ptr2 += 10;
+            *ptr2 += 20;
           }
+         // printf("---2begin print stats\n");
+         // print_stats(stm_data);
+         // printf("--2end print stats\n");
           TX_commit(stm_data,tx_data);
         }
       }
@@ -59,9 +63,9 @@ int main()
   STMData* stm_data = STM_start(num_objects, num_tx, num_locators); 
   init_objects(stm_data,num_objects,100);
   init_locators(stm_data,num_tx,num_locators);
-
+  
   pthread_t threads[num_tx];
-
+//print_locator(stm_data,(Locator*)0x55555555a440);
   for(int i=0; i< num_tx; i++)
    {
     pthread_create(&threads[i],NULL, foo, stm_data);

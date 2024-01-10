@@ -6,6 +6,7 @@ void* foo(void* p){
    
    STMData* stm_data = (STMData*) p;
    TX_Data* tx_data = TX_Init(stm_data);
+
    int aborted;
    do{
       TX_Start(stm_data,tx_data);
@@ -16,7 +17,7 @@ void* foo(void* p){
         int* ptr_value=TX_Open_Write(stm_data,tx_data,1);
         if(ptr_value !=0 )
         {
-          *ptr_value = *ptr_value +1 ;
+          *ptr_value = *ptr_value +10 ;
           TX_commit(stm_data,tx_data);
         }
       }
@@ -42,9 +43,22 @@ int main()
   int num_locators = MAX_LOCATORS;
   int num_tx = 2000;
  
+  
   STMData* stm_data = STM_start(num_objects, num_tx, num_locators); 
+  
   init_objects(stm_data,num_objects,100);
+  //printf("---start stats----\n");
+  //print_stats(stm_data);
+  //printf("---end stats----\n");
   init_locators(stm_data,num_tx,num_locators);
+  
+  //Locator *loc1 = &stm_data -> locators[stm_data->vboxes[0]];
+  //Locator *loc2 = &stm_data -> locators[stm_data->vboxes[1]];
+
+  //print_locator(stm_data,loc1);
+  //print_locator(stm_data,loc2);
+  //exit(0);
+     print_stats(stm_data);
 
   pthread_t threads[num_tx];
 
@@ -61,8 +75,8 @@ int main()
    }
 
   
-  print_locator(stm_data,stm_data->vboxes[0]);
-  print_locator(stm_data,stm_data->vboxes[1]);
+ // print_locator(stm_data,stm_data->vboxes[0]);
+ // print_locator(stm_data,stm_data->vboxes[1]);
   print_stats(stm_data);
   
   
