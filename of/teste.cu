@@ -57,7 +57,7 @@ void foo(STMData* stm_data){
                 {
                     if(*ptr1 > 10)
                     {
-                    *ptr1 -= 10;
+                    *ptr1 -= 20;
                     *ptr2 += 10;
                     }
                     TX_commit(stm_data,tx_data);
