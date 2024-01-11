@@ -29,7 +29,9 @@ __global__
 void foo(STMData* stm_data){
    printf("aqui\n.");
    int id = threadIdx.x + blockIdx.x * blockDim.x;
+   printf("id %d\n", id);
    TX_Data* tx_data = TX_Init(stm_data,id);
+   printf("after init\n");
    int n_trans = 10;
    int trans = 0;
    while(trans<n_trans)
