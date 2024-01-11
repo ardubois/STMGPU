@@ -317,7 +317,7 @@ for(int i=0;i<tx_data->write_set.size;i++)
 }
 */
 __device__ int TX_commit(STMData* stm_data, TX_Data* tx_data)
-{
+{ __threadfence();
   if(TX_validate_readset(stm_data,tx_data))
   {
      if(atomicCAS(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,COMMITTED)==ACTIVE)
@@ -371,7 +371,8 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
               if(TX_contention_manager(stm_data,tx_data, new_locator->owner,locator->owner))
               {
                 if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
-                {
+                { 
+                  __threadfence();
                   if(atomicCAS(&stm_data->tr_state[locator -> owner],ACTIVE ,ABORTED)==ACTIVE)
                   {
                    *new_locator->old_version = *locator->old_version;
@@ -400,7 +401,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
           }
    
       if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
-      {
+      {  __threadfence();
          if(atomicCAS(&stm_data -> vboxes[object],addr_locator ,addr_new_locator)==addr_locator){
             //printf("CAS\n");
             //print_locator(stm_data,new_locator);
