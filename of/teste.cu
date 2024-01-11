@@ -36,10 +36,15 @@ void foo(STMData* stm_data){
    int trans = 0;
    while(trans<n_trans)
    {
-        int o1 = (int)rand_() % (N_OBJECTS -1);
+        float rand1 = rand_();
+        float rand2 = rand_();
+        printf("rand1 %f",rand1);
+        printf("rand2 %f",rand2);
+        printf("nbjects %d", N_OBJECTS);
+        int o1 = (int)rand1 % (N_OBJECTS -1);
         int o2;
         do{
-            o2 = (int) rand_() % (N_OBJECTS -1);
+            o2 = (int) rand2 % (N_OBJECTS -1);
         }while(o1 == o2);
       printf("o1: %d, o2: %d\n",o1,o2);
 
@@ -92,7 +97,7 @@ int main()
 {
   int num_objects = N_OBJECTS;
   int num_locators = MAX_LOCATORS;
-  int num_tx = 10;
+  int num_tx = 2;
 
   int num_blocks = num_tx;
   int num_threads = 1;
