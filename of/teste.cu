@@ -45,9 +45,9 @@ void foo(STMData* stm_data){
         printf("nbjects %d", N_OBJECTS);
         int o1 = (int)rand1 % (N_OBJECTS -1);
         int o2;
-        do{
+       // do{
             o2 = (int) rand2 % (N_OBJECTS -1);
-        }while(o1 == o2);
+        //}while(o1 == o2);
       printf("o1: %d, o2: %d\n",o1,o2);
 
    
