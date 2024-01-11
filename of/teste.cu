@@ -40,8 +40,10 @@ void foo(STMData* stm_data){
    {
         float rand1 = rand_();
         float rand2 = rand_();
-        printf("rand1 %f",rand1);
-        printf("rand2 %f",rand2);
+        printf("rand1 %f\n",rand1);
+        printf("rand2 %f\n",rand2);
+        printf("rand1 %f\n",rand_());
+        printf("rand2 %f\n",rand_());
         printf("nbjects %d", N_OBJECTS);
         int o1 = (int)rand1 % (N_OBJECTS -1);
         int o2;
