@@ -97,10 +97,12 @@ __device__ TX_Data* TX_Init(STMData* stm_data, int tx_id)
    
     TX_Data *d = &stm_data -> tx_data[tx_id];
     int numLocators = stm_data -> num_locators;
+    
+    int locator_queue[MAX_LOCATORS];
 
     d-> tr_id = tx_id;
     d-> next_locator = 0;
-    d -> locator_queue = (int*) malloc(numLocators * sizeof(int));
+    d -> locator_queue = locator_queue;
     d -> read_set.size =0;
     d -> write_set.size = 0;
     d -> n_aborted = 0;
