@@ -39,23 +39,15 @@ void STM_copy_from_device(STMData* d_stm_data, STMData* stm_data)
    STMData local_ddata;
    CUDA_CHECK_ERROR( cudaMemcpy(&local_ddata, d_stm_data,  sizeof(STMData), cudaMemcpyDeviceToHost), " copy stm data");
 
-   printf("antes vboxes\n");
     CUDA_CHECK_ERROR( cudaMemcpy(stm_data->vboxes, local_ddata.vboxes, numObjects * sizeof(int), cudaMemcpyDeviceToHost), " vboxes ");
-    printf("antes tr state\n");
     CUDA_CHECK_ERROR( cudaMemcpy(stm_data->tr_state, local_ddata.tr_state, numTransactions * sizeof(int)+2, cudaMemcpyDeviceToHost), " tr state");
-    printf("antes locators\n");
     cudaMemcpy( stm_data->locators, local_ddata.locators, (numObjects + (numLocators * numTransactions)) * sizeof(Locator), cudaMemcpyDeviceToHost);
-    printf("antes loc data\n");
     cudaMemcpy(stm_data->locators_data, local_ddata.locators_data,((2*numObjects)+(2*numLocators * numTransactions)) * sizeof(int), cudaMemcpyDeviceToHost);
-    printf("antes txdata\n");
     cudaMemcpy(stm_data->tx_data, local_ddata.tx_data,numTransactions * sizeof(TX_Data), cudaMemcpyDeviceToHost);
 
      fix_pointers_locators(stm_data,stm_data->locators_data);
 
-     int addr_locator =  stm_data -> vboxes[1];
-      Locator* locator = &stm_data -> locators[addr_locator];
-     print_locator(stm_data,locator);
-}
+   }
 
 STMData* STM_copy_to_device(STMData* stm_data)
 {

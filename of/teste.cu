@@ -92,7 +92,7 @@ int main()
 {
   int num_objects = N_OBJECTS;
   int num_locators = MAX_LOCATORS;
-  int num_tx = 1;
+  int num_tx = 10;
 
   int num_blocks = num_tx;
   int num_threads = 1;
