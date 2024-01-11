@@ -26,9 +26,8 @@ __device__ float rand_() {
 }
 
 __global__
-void foo(void* p){
-   printf("\naqui.");
-   STMData* stm_data = (STMData*) p;
+void foo(STMData* stm_data){
+   printf("aqui\n.");
    int id = threadIdx.x + blockIdx.x * blockDim.x;
    TX_Data* tx_data = TX_Init(stm_data,id);
    int n_trans = 10;
