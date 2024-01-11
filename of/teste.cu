@@ -92,7 +92,7 @@ printf("antes kernel launch\n");
   cudaError_t kernelErr = cudaGetLastError();
   if(kernelErr != cudaSuccess) printf("Error: %s\n", cudaGetErrorString(kernelErr));
 printf("antes copy back\n");
-  //STM_copy_from_device(d_stm_data,stm_data);
+  STM_copy_from_device(d_stm_data,stm_data);
 
   printf("FIM!\n");
   print_stats(stm_data);
