@@ -105,7 +105,7 @@ int main()
   CUDA_CHECK_ERROR( cudaDeviceSynchronize() , " synchronize ");
   //kernelErr = cudaGetLastError();
   //if(kernelErr != cudaSuccess) printf("Error synchronize: %s\n", cudaGetErrorString(kernelErr));
-  
+  printf("ACABOU!\n");
   STM_copy_from_device(d_stm_data,stm_data);
   printf("FIM!\n");
   print_stats(stm_data);
