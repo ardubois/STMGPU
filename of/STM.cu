@@ -100,8 +100,9 @@ __device__ TX_Data* TX_Init(STMData* stm_data, int tx_id)
     int numLocators = stm_data -> num_locators;
     
     int locator_queue[MAX_LOCATORS];
-printf("depois\n");
+
     d-> tr_id = tx_id;
+    printf("depois\n");
     d-> next_locator = 0;
     d -> locator_queue = locator_queue;
     d -> read_set.size =0;
