@@ -79,17 +79,19 @@ int main()
 
   int num_blocks = num_tx;
   int num_threads = 1;
- 
+ printf("antes stmstart\n");
   STMData* stm_data = STM_start(num_objects, num_tx, num_locators); 
+  printf("antes init objects\n");
   init_objects(stm_data,num_objects,100);
+  printf("antes init locators\n");
   init_locators(stm_data,num_tx,num_locators);
-  
+  printf("antes copy\n");
   STMData *d_stm_data = STM_copy_to_device(stm_data);
-
+printf("antes kernel launch\n");
   foo<<<num_blocks,num_threads>>>(d_stm_data);
   cudaError_t kernelErr = cudaGetLastError();
   if(kernelErr != cudaSuccess) printf("Error: %s\n", cudaGetErrorString(kernelErr));
-
+printf("antes copy back\n");
   STM_copy_from_device(d_stm_data,stm_data);
 
   printf("FIM!\n");
