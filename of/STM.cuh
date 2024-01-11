@@ -86,8 +86,8 @@ void init_objects(STMData* stm_data,int num_objects, int value);
 void fix_pointers_locators(STMData* stm_data, int* locators_data);
 
 void print_vboxes(STMData* stm_data);
-void print_tr_state(int tr_state);
-void print_locator(STMData* stm_data,Locator *locator);
+__host__ __device__ void print_tr_state(int tr_state);
+__host__ __device__ void print_locator(STMData* stm_data,Locator *locator);
 void print_stats(STMData* stm_data);
 
 //#endif

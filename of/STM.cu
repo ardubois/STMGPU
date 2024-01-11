@@ -350,7 +350,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
    {
        int addr_locator =  stm_data -> vboxes[object];
       Locator* locator = &stm_data -> locators[addr_locator];
-     // print_locator(stm_data,locator);
+     print_locator(stm_data,locator);
       int addr_new_locator = TX_new_locator(stm_data,tx_data);
       Locator *new_locator = &stm_data -> locators[addr_new_locator];
       new_locator -> owner = tx_data->tr_id;
@@ -647,7 +647,7 @@ void print_vboxes(STMData* stm_data)
 }
 
 
-void print_tr_state(int tr_state)
+__host__ __device__ void print_tr_state(int tr_state)
 {
     switch ( tr_state )
   {
@@ -667,7 +667,7 @@ void print_tr_state(int tr_state)
     printf ("Unknown thread state!");
   }
 }
-void print_locator(STMData* stm_data,Locator *locator)
+__host__ __device__ void print_locator(STMData* stm_data,Locator *locator)
 {
   printf("Locator %p:\n", locator);
   printf("- owner: %d\n",locator->owner);
