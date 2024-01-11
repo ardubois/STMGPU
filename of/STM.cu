@@ -357,7 +357,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
       assert(locator -> owner != new_locator -> owner);
       switch (stm_data->tr_state[locator -> owner]) {
             case COMMITTED:
-              printf("commited\n");
+              printf("commited %d\n",*locator->new_version);
               *new_locator-> old_version =  *locator->new_version;
               printf("commited primmeiro\n");
               *new_locator-> new_version = *new_locator-> old_version;
