@@ -1,3 +1,5 @@
+make clean
+rm bank
 cd ..
 git pull
 cd of
