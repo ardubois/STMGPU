@@ -27,7 +27,7 @@ __device__ float rand_() {
 
 __global__
 void foo(void* p){
-   printf("aqui.");
+   printf("\naqui.");
    STMData* stm_data = (STMData*) p;
    int id = threadIdx.x + blockIdx.x * blockDim.x;
    TX_Data* tx_data = TX_Init(stm_data,id);
@@ -40,7 +40,8 @@ void foo(void* p){
         do{
             o2 = (int) rand_() % (N_OBJECTS -1);
         }while(o1 == o2);
-      //printf("o1: %d, o2: %d\n",o1,o2);
+      printf("o1: %d, o2: %d\n",o1,o2);
+
    
         int aborted;
         do{
