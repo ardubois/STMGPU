@@ -82,7 +82,7 @@ void foo(STMData* stm_data){
         printf("commit %d!\n",trans);
    }
  //   return NULL;
-    
+    printf("saiu!\n");
 }
 
 int main()
