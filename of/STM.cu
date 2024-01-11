@@ -1,6 +1,14 @@
 #include "STM.cuh"
 
-
+#define CUDA_CHECK_ERROR(func, msg) ({ \
+	cudaError_t cudaError; \
+	if (cudaSuccess != (cudaError = func)) { \
+		fprintf(stderr, #func ": in " __FILE__ ":%i : " msg "\n   > %s\n", \
+		__LINE__, cudaGetErrorString(cudaError)); \
+    *((int*)0x0) = 0; /* exit(-1); */ \
+	} \
+  cudaError; \
+})
 
 int tr_id_gen=0;
 
@@ -29,12 +37,12 @@ void STM_copy_from_device(STMData* d_stm_data, STMData* stm_data)
     int numLocators = stm_data -> num_locators;
    
    STMData local_ddata;
-   cudaMemcpy(&local_ddata, d_stm_data, numObjects * sizeof(int), cudaMemcpyDeviceToHost);
+   CUDA_CHECK_ERROR( cudaMemcpy(&local_ddata, d_stm_data, numObjects * sizeof(int), cudaMemcpyDeviceToHost), " copy stm data");
 
    printf("antes vboxes\n");
-    cudaMemcpy(stm_data->vboxes, local_ddata.vboxes, numObjects * sizeof(int), cudaMemcpyDeviceToHost);
+    CUDA_CHECK_ERROR( cudaMemcpy(stm_data->vboxes, local_ddata.vboxes, numObjects * sizeof(int), cudaMemcpyDeviceToHost), " vboxes ");
     printf("antes tr state\n");
-    cudaMemcpy(stm_data->tr_state, local_ddata.tr_state, numTransactions * sizeof(int)+2, cudaMemcpyDeviceToHost);
+    CUDA_CHECK_ERROR( cudaMemcpy(stm_data->tr_state, local_ddata.tr_state, numTransactions * sizeof(int)+2, cudaMemcpyDeviceToHost), " tr state");
     printf("antes locators\n");
     cudaMemcpy( stm_data->locators, local_ddata.locators, (numObjects + (numLocators * numTransactions)) * sizeof(Locator), cudaMemcpyDeviceToHost);
     printf("antes loc data\n");
