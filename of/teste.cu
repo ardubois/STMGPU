@@ -99,9 +99,9 @@ int main()
   cudaError_t kernelErr = cudaGetLastError();
   if(kernelErr != cudaSuccess) printf("Error kernel: %s\n", cudaGetErrorString(kernelErr));
 
-  cudaDeviceSynchronize();
-  kernelErr = cudaGetLastError();
-  if(kernelErr != cudaSuccess) printf("Error synchronize: %s\n", cudaGetErrorString(kernelErr));
+  CUDA_CHECK_ERROR( cudaDeviceSynchronize() );
+  //kernelErr = cudaGetLastError();
+  //if(kernelErr != cudaSuccess) printf("Error synchronize: %s\n", cudaGetErrorString(kernelErr));
   
   STM_copy_from_device(d_stm_data,stm_data);
   printf("FIM!\n");
