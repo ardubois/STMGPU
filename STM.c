@@ -293,7 +293,7 @@ int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
               *new_locator-> new_version = *new_locator-> old_version;
               break;
             case ACTIVE: 
-              printf("here\n");
+             // printf("here\n");
               if(TX_contention_manager(stm_data,tx_data, new_locator->owner,locator->owner))
               {
                 if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
@@ -380,7 +380,8 @@ int TX_contention_manager7(STMData* stm_data, TX_Data* tx_data,unsigned int me, 
   { tx_data->cm_aborts =0;
     return 1;
   } else {
-    tx_data->cm_aborts ++;   
+    tx_data->cm_aborts ++;  
+    return 0; 
   }
 }
 
@@ -453,7 +454,7 @@ int TX_contention_manager4(STMData* stm_data, TX_Data* tx_data,unsigned int me, 
 
 int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
-  TX_contention_manager7(stm_data,tx_data, me, enemy);
+  return TX_contention_manager7(stm_data,tx_data, me, enemy);
 }
 
 
@@ -499,11 +500,11 @@ void TX_abort_tr(STMData* stm_data, TX_Data* tx_data){
 
   for (int i = 0; i < tx_data->write_set.size; i ++)
   {
-    if(!__sync_bool_compare_and_swap(&stm_data-> locators[tx_data -> write_set.locators[i]].owner, tx_data->tr_id , (stm_data -> num_tr)+1))
-    {
-      printf("nao deveria\n owner = %d, id = %d,locaotr: %d\n",stm_data-> locators[tx_data -> write_set.locators[i]].owner,  tx_data->tr_id,tx_data ->write_set.locators[i]);
-      exit(0);
-    }
+    assert(__sync_bool_compare_and_swap(&stm_data-> locators[tx_data -> write_set.locators[i]].owner, tx_data->tr_id , (stm_data -> num_tr)+1));
+    //{
+      //printf("nao deveria\n owner = %d, id = %d,locaotr: %d\n",stm_data-> locators[tx_data -> write_set.locators[i]].owner,  tx_data->tr_id,tx_data ->write_set.locators[i]);
+     // exit(0);
+    //}
   }
 
   assert(stm_data->tr_state[tx_data->tr_id] == ABORTED);

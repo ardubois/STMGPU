@@ -45,7 +45,7 @@ typedef struct TX_Data_
     WriteSet write_set;
     unsigned short n_aborted;
     unsigned short n_committed; // maximum 1
-    unsigned int cm_enemy;
+    int cm_enemy;
     unsigned int cm_aborts;
 } TX_Data;
 
