@@ -47,6 +47,7 @@ void foo(STMData* stm_data){
         int aborted;
         do{
             TX_Start(stm_data,tx_data);
+            printf("depois do start\n")
             aborted = 0;
             int* ptr1 = TX_Open_Write(stm_data,tx_data,o1);
             if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
