@@ -43,6 +43,10 @@ void STM_copy_from_device(STMData* d_stm_data, STMData* stm_data)
     cudaMemcpy(stm_data->tx_data, local_ddata.tx_data,numTransactions * sizeof(TX_Data), cudaMemcpyDeviceToHost);
 
      fix_pointers_locators(stm_data,stm_data->locators_data);
+
+     int addr_locator =  stm_data -> vboxes[1];
+      Locator* locator = &stm_data -> locators[addr_locator];
+     print_locator(stm_data,locator);
 }
 
 STMData* STM_copy_to_device(STMData* stm_data)
