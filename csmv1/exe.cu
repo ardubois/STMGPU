@@ -6,6 +6,8 @@
 #include "API.cuh"
 #include "util.cuh"
 #include <unistd.h>
+#include <curand.h>
+#include <curand_kernel.h>
 
 #define KERNEL_DURATION 5
 #define DISJOINT 0
@@ -29,7 +31,18 @@ __forceinline__ __device__ unsigned get_lane_id() {
 
 __device__ int waitMem;
 
-__global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned int roSize, unsigned int txSize, unsigned int dataSize, 
+
+__device__ float rand_() {
+
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+       curandState state;
+        curand_init(clock64(), i, 0, &state);
+
+       return curand_uniform(&state);
+
+}
+
+__global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned int roSize, unsigned int txSize, unsigned int dataSize, 
 								unsigned int threadNum, VertionedDataItem* data, TXRecord* record, TMmetadata* metadata, Statistics* stats, time_rate* times)
 {
 	local_metadata txData;
@@ -37,8 +50,8 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 
 	int id = threadIdx.x + blockIdx.x * blockDim.x;
 	//long mod = 0xFFFF;
-	long rnd;
-	long probRead;// = prRead * 0xFFFF;
+	int rnd;
+	long probRead= prRead;
 
 	uint64_t state = seed+id;
 	
@@ -67,7 +80,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 		
 
 		///////
-			rnd = (RAND_R_FNC(seed) %10) +1;
+			rnd = ((int)(rand_()*10)) + 1;     //  (RAND_R_FNC(seed) %10) +1;
 //        printf("rand %d  -  %d\n",rnd,txSize);
 		///////
 		start_time_total = clock64();
@@ -77,16 +90,17 @@ __global__ void bank_kernel(int *flag, unsigned int seed, float prRead, unsigned
 			TXBegin(*metadata, &txData);
             //printf("1TXISABORTED %d\n", txData.isAborted);			
 			//Read-Only TX
-			if(1)//if(rnd <= probRead)
+			if(rnd <= probRead)
 			{
-				printf("rnd %d probread %d\n", rnd, probRead);
+			//	printf("rnd %d probread %d\n", rnd, probRead);
 				value=0;
 				for(int i=0; i<roSize && txData.isAborted==false; i++)//for(int i=0; i<roSize && txData.isAborted==false; i++)//
 				{
 			#if DISJOINT					
 					addr = RAND_R_FNC(state)%(max-min+1) + min;
 			#else
-					addr = RAND_R_FNC(state)%dataSize;
+				//	addr = RAND_R_FNC(state)%dataSize;
+					addr = (int)(rand_()*dataSize);
 			#endif
 					value+=TXReadOnly(data, i, &txData);
 				}
@@ -121,12 +135,13 @@ result =0;
 //printf("2TXISABORTED %d\n", txData.isAborted);
 				for(int i=0; i<txSize && txData.isAborted==false; i++)
 				{
-					addr = RAND_R_FNC(state)%dataSize;
+					addr = (int)(rand_()*dataSize);
+					//addr = RAND_R_FNC(state)%dataSize;
 					value = TXRead(data, addr, &txData); 
 					TXWrite(data, value-(1), addr, &txData);	
 				//	printf("1tx ws size %d\n",txData.ws.size);
-
-					addr = RAND_R_FNC(state)%dataSize;
+                    addr = (int)(rand_()*dataSize);
+					//addr = RAND_R_FNC(state)%dataSize;
 					value = TXRead(data, addr, &txData); 
 					TXWrite(data, value+(1), addr, &txData);
 				//	printf("2tx ws size %d\n",txData.ws.size);
@@ -140,7 +155,7 @@ result =0;
 			start_time_commit = clock64(); 
 			//printf("tx ws size %d\n",txData.ws.size);
   			result=TXCommit(id,record,data,metadata,txData,stats,times);
-			printf("3tx ws size %d\n",txData.ws.size);
+			//printf("3tx ws size %d\n",txData.ws.size);
   			stop_time_commit = clock64();
   			if(!result)
 			{
@@ -269,7 +284,7 @@ void getKernelOutput(Statistics *h_stats, time_rate *h_times, uint threadNum, in
 int main(int argc, char *argv[])
 {
 	unsigned int blockNum, threads_per_block, roSize, threadSize, dataSize, seed, verbose;
-	float prRead;
+	int prRead;
 
 	VertionedDataItem *h_data, *d_data;
 	TXRecord *records;
@@ -300,7 +315,7 @@ int main(int argc, char *argv[])
 	dataSize			= atoi(argv[argCnt++]);
 	threads_per_block	= atoi(argv[argCnt++]);
 	blockNum		 	= atoi(argv[argCnt++]);
-	prRead 				= (atoi(argv[argCnt++])/100.0);
+	prRead 				= atoi(argv[argCnt++]);
 	roSize 				= atoi(argv[argCnt++]);
 	threadSize			= atoi(argv[argCnt++]);
 	verbose				= atoi(argv[argCnt++]);
