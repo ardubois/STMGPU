@@ -349,25 +349,16 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
        int addr_locator =  stm_data -> vboxes[object];
       Locator* locator = &stm_data -> locators[addr_locator];
      // print_locator(stm_data,locator);
-      printf("aqui\n");
       int addr_new_locator = TX_new_locator(stm_data,tx_data);
-      printf("addr locator %d\n",addr_new_locator);
       Locator *new_locator = &stm_data -> locators[addr_new_locator];
-      printf("pau pau \n");
       new_locator -> owner = tx_data->tr_id;
       new_locator -> object = object;
-      printf("depois set up locators\n");
       assert(locator -> owner != new_locator -> owner);
-      printf("locator owner %d\n",locator -> owner);
-      printf("locator addr %d\n",addr_locator);
       
       switch (stm_data->tr_state[locator -> owner]) {
             case COMMITTED:
-              printf("commited %d\n",*locator->new_version);
               *new_locator-> old_version =  *locator->new_version;
-              printf("commited primmeiro\n");
               *new_locator-> new_version = *new_locator-> old_version;
-              printf("commited depois copia\n");
               break;
             case ABORTED:
               *new_locator->old_version =  *locator->old_version;

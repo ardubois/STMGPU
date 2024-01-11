@@ -79,6 +79,7 @@ void foo(STMData* stm_data){
                 assert(stm_data->tr_state[tx_data->tr_id] != ACTIVE);
       
         }while(aborted);
+        printf("commit %d!\n",trans);
    }
  //   return NULL;
     
