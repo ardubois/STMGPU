@@ -34,14 +34,15 @@ void STM_copy_from_device(STMData* d_stm_data, STMData* stm_data)
    printf("antes vboxes\n");
     cudaMemcpy(stm_data->vboxes, local_ddata.vboxes, numObjects * sizeof(int), cudaMemcpyDeviceToHost);
     printf("antes tr state\n");
-    //cudaMemcpy(stm_data->tr_state, d_stm_data->tr_state, numTransactions * sizeof(int)+2, cudaMemcpyDeviceToHost);
+    cudaMemcpy(stm_data->tr_state, local_ddata.tr_state, numTransactions * sizeof(int)+2, cudaMemcpyDeviceToHost);
     printf("antes locators\n");
-    //cudaMemcpy( stm_data->locators, d_stm_data->locators, (numObjects + (numLocators * numTransactions)) * sizeof(Locator), cudaMemcpyDeviceToHost);
+    cudaMemcpy( stm_data->locators, local_ddata.locators, (numObjects + (numLocators * numTransactions)) * sizeof(Locator), cudaMemcpyDeviceToHost);
     printf("antes loc data\n");
-    //cudaMemcpy(stm_data->locators_data, d_stm_data->locators_data,((2*numObjects)+(2*numLocators * numTransactions)) * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(stm_data->locators_data, local_ddata.locators_data,((2*numObjects)+(2*numLocators * numTransactions)) * sizeof(int), cudaMemcpyDeviceToHost);
     printf("antes txdata\n");
-    //cudaMemcpy(stm_data->tx_data, d_stm_data->tx_data,numTransactions * sizeof(TX_Data), cudaMemcpyDeviceToHost);
+    cudaMemcpy(stm_data->tx_data, local_ddata.tx_data,numTransactions * sizeof(TX_Data), cudaMemcpyDeviceToHost);
 }
+
 STMData* STM_copy_to_device(STMData* stm_data)
 {
     int numObjects = stm_data -> n_objects;
