@@ -99,7 +99,7 @@ int main()
   cudaError_t kernelErr = cudaGetLastError();
   if(kernelErr != cudaSuccess) printf("Error kernel: %s\n", cudaGetErrorString(kernelErr));
 
-  CUDA_CHECK_ERROR( cudaDeviceSynchronize() );
+  CUDA_CHECK_ERROR( cudaDeviceSynchronize() , " synchronize ");
   //kernelErr = cudaGetLastError();
   //if(kernelErr != cudaSuccess) printf("Error synchronize: %s\n", cudaGetErrorString(kernelErr));
   
