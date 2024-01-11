@@ -87,7 +87,7 @@ void foo(STMData* stm_data){
     printf("saiu!\n");
     int addr_locator =  stm_data -> vboxes[1];
       Locator* locator = &stm_data -> locators[addr_locator];
-     print_locator(stm_data,locator);
+     //print_locator(stm_data,locator);
   
 }
 
