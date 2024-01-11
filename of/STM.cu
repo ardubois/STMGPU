@@ -37,7 +37,7 @@ void STM_copy_from_device(STMData* d_stm_data, STMData* stm_data)
     int numLocators = stm_data -> num_locators;
    
    STMData local_ddata;
-   CUDA_CHECK_ERROR( cudaMemcpy(&local_ddata, d_stm_data, numObjects * sizeof(STMData), cudaMemcpyDeviceToHost), " copy stm data");
+   CUDA_CHECK_ERROR( cudaMemcpy(&local_ddata, d_stm_data,  sizeof(STMData), cudaMemcpyDeviceToHost), " copy stm data");
 
    printf("antes vboxes\n");
     CUDA_CHECK_ERROR( cudaMemcpy(stm_data->vboxes, local_ddata.vboxes, numObjects * sizeof(int), cudaMemcpyDeviceToHost), " vboxes ");
