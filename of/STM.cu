@@ -354,6 +354,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
       new_locator -> owner = tx_data->tr_id;
       new_locator -> object = object;
       printf("depois set up locators\n");
+      assert(0);
       assert(locator -> owner != new_locator -> owner);
       switch (stm_data->tr_state[locator -> owner]) {
             case COMMITTED:
