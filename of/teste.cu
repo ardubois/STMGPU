@@ -34,15 +34,15 @@ void foo(STMData* stm_data){
    printf("id %d\n", id);
    TX_Data* tx_data = TX_Init(stm_data,id);
    printf("after init\n");
-   int n_trans = 1;
+   int n_trans = 10;
    int trans = 0;
    while(trans<n_trans)
    {
         int o1 = (int)(rand_() * N_OBJECTS) ;
         int o2;
-       // do{
+        do{
             o2 = (int) (rand_() * N_OBJECTS);
-        //}while(o1 == o2);
+        }while(o1 == o2);
       printf("o1: %d, o2: %d\n",o1,o2);
 
    
