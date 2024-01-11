@@ -83,7 +83,7 @@ STMData* STM_copy_to_device(STMData* stm_data)
 
     STMData* d_stm_data;
     cudaMalloc((void**)&d_stm_data,  sizeof(STMData));
-    cudaMemcpy(d_stm_data, stm_data, sizeof(STMData), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_stm_data, meta_data, sizeof(STMData), cudaMemcpyHostToDevice);
 
     cudaError_t j_error = cudaGetLastError();
     if(j_error != cudaSuccess) printf("Error 1: %s\n", cudaGetErrorString(j_error));
