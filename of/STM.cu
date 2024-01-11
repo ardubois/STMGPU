@@ -27,8 +27,12 @@ void STM_copy_from_device(STMData* d_stm_data, STMData* stm_data)
     int numObjects = stm_data -> n_objects;
     int numTransactions = stm_data -> num_tr;
     int numLocators = stm_data -> num_locators;
+   
+   STMData local_ddata;
+   cudaMemcpy(&local_ddata, d_stm_data, numObjects * sizeof(int), cudaMemcpyDeviceToHost);
+
    printf("antes vboxes\n");
-    cudaMemcpy(stm_data->vboxes, d_stm_data->vboxes, numObjects * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(stm_data->vboxes, local_ddata.vboxes, numObjects * sizeof(int), cudaMemcpyDeviceToHost);
     printf("antes tr state\n");
     //cudaMemcpy(stm_data->tr_state, d_stm_data->tr_state, numTransactions * sizeof(int)+2, cudaMemcpyDeviceToHost);
     printf("antes locators\n");
