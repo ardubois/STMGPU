@@ -27,14 +27,14 @@ __device__ float rand_() {
 
 __global__
 void foo(STMData* stm_data){
-  if(1)
+  
    printf("aqui\n.");
-   else{
+   
    int id = threadIdx.x + blockIdx.x * blockDim.x;
    printf("id %d\n", id);
    TX_Data* tx_data = TX_Init(stm_data,id);
    printf("after init\n");
-   int n_trans = 10;
+   int n_trans = 1;
    int trans = 0;
    while(trans<n_trans)
    {
@@ -93,7 +93,7 @@ void foo(STMData* stm_data){
     int addr_locator =  stm_data -> vboxes[1];
       Locator* locator = &stm_data -> locators[addr_locator];
      print_locator(stm_data,locator);
-   }
+  
 }
 
 int main()
