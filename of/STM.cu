@@ -96,11 +96,11 @@ __device__ TX_Data* TX_Init(STMData* stm_data, int tx_id)
 {
    printf("Antes\n");
     TX_Data *d = &stm_data -> tx_data[tx_id];
-printf("depois\n");
+
     int numLocators = stm_data -> num_locators;
     
     int locator_queue[MAX_LOCATORS];
-
+printf("depois\n");
     d-> tr_id = tx_id;
     d-> next_locator = 0;
     d -> locator_queue = locator_queue;
