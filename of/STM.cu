@@ -103,7 +103,7 @@ STMData* STM_copy_to_device(STMData* stm_data)
 
 __device__ TX_Data* TX_Init(STMData* stm_data, int tx_id)
 {
-   printf("Antes\n");
+  
     TX_Data *d = &stm_data -> tx_data[tx_id];
 
     int numLocators = stm_data -> num_locators;
@@ -111,7 +111,6 @@ __device__ TX_Data* TX_Init(STMData* stm_data, int tx_id)
     int locator_queue[MAX_LOCATORS];
 
     d-> tr_id = tx_id;
-    printf("depois\n");
     d-> next_locator = 0;
     d -> locator_queue = locator_queue;
     d -> read_set.size =0;
@@ -169,9 +168,6 @@ __device__ void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
     
     int pos_queue = tx_data -> next_locator;
     tx_data -> next_locator ++;
-    //printf("next: %d  used: %d\n",tx_data -> next_locator,used_pos);
-    if(tx_data -> next_locator != used_pos)
-       printf("AQUI: next %d next_locator: %d used_pos %d\n",next,tx_data -> next_locator ,used_pos);
     assert(tx_data -> next_locator == used_pos);
     used_pos--;
     assert(used_pos == pos_queue);
@@ -354,7 +350,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
    {
        int addr_locator =  stm_data -> vboxes[object];
       Locator* locator = &stm_data -> locators[addr_locator];
-     print_locator(stm_data,locator);
+   //  print_locator(stm_data,locator);
       int addr_new_locator = TX_new_locator(stm_data,tx_data);
       Locator *new_locator = &stm_data -> locators[addr_new_locator];
       new_locator -> owner = tx_data->tr_id;
