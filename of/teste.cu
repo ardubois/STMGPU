@@ -38,17 +38,10 @@ void foo(STMData* stm_data){
    int trans = 0;
    while(trans<n_trans)
    {
-        float rand1 = rand_();
-        float rand2 = rand_();
-        printf("rand1 %f\n",rand1);
-        printf("rand2 %f\n",rand2);
-        printf("rand1 %f\n",rand_());
-        printf("rand2 %f\n",rand_());
-        printf("nbjects %d", N_OBJECTS);
-        int o1 = (int)rand1 % (N_OBJECTS -1);
+        int o1 = (int)(rand_() * N_OBJECTS) ;
         int o2;
        // do{
-            o2 = (int) rand2 % (N_OBJECTS -1);
+            o2 = (int) (rand_() * N_OBJECTS);
         //}while(o1 == o2);
       printf("o1: %d, o2: %d\n",o1,o2);
 
