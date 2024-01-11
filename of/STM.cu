@@ -94,8 +94,9 @@ STMData* STM_copy_to_device(STMData* stm_data)
 
 __device__ TX_Data* TX_Init(STMData* stm_data, int tx_id)
 {
-   
+   printf("Antes\n");
     TX_Data *d = &stm_data -> tx_data[tx_id];
+printf("depois\n");
     int numLocators = stm_data -> num_locators;
     
     int locator_queue[MAX_LOCATORS];
