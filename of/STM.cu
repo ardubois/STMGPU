@@ -600,8 +600,8 @@ __device__ void TX_abort_tr(STMData* stm_data, TX_Data* tx_data){
 void fix_pointers_locators(STMData* stm_data, int* locators_data)
 {
   int initial_locators = stm_data -> num_locators * stm_data-> num_tr;
-  int num_objects = stm_data -> num_objects;
-  for(i=0; i< (initial_locators+num_objects);i++)
+  int num_objects = stm_data -> n_objects;
+  for(int i=0; i< (initial_locators+num_objects);i++)
   {
 
     stm_data-> locators[i].new_version = locators_data+2*i;

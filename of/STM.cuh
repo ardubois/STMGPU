@@ -83,6 +83,7 @@ __device__ void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data);
 
 void init_locators(STMData* stm_data,int num_tx, int num_locators);
 void init_objects(STMData* stm_data,int num_objects, int value);
+void fix_pointers_locators(STMData* stm_data, int* locators_data);
 
 void print_vboxes(STMData* stm_data);
 void print_tr_state(int tr_state);
