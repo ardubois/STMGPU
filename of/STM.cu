@@ -325,7 +325,7 @@ __device__ int TX_commit(STMData* stm_data, TX_Data* tx_data)
       //TX_free_writeset(stm_data,tx_data, COMMITTED);
       for(int i=0;i<tx_data->write_set.size;i++)
       {
-     // printf("\nowner: %d, me: %d\n\n",tx_data->write_set.locators[i]->owner,tx_data->tr_id);
+      printf("\nowner: %d, me: %d\n\n",tx_data->write_set.locators[i]->owner,tx_data->tr_id);
         assert(atomicCAS(&stm_data-> locators[tx_data->write_set.locators[i]].owner,tx_data->tr_id,stm_data-> num_tr)==tx_data->tr_id);
       }
       tx_data -> n_committed ++;
