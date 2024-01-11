@@ -29,6 +29,12 @@ __global__
 void foo(STMData* stm_data){
   
    printf("aqui\n.");
+
+   if(1)
+   {
+    for(int i=0;i<100;i++)
+     printf("ale %d",(int)(rand_()*10));
+   } else{
    
    int id = threadIdx.x + blockIdx.x * blockDim.x;
    printf("id %d\n", id);
@@ -88,7 +94,7 @@ void foo(STMData* stm_data){
     int addr_locator =  stm_data -> vboxes[1];
       Locator* locator = &stm_data -> locators[addr_locator];
      //print_locator(stm_data,locator);
-  
+   }
 }
 
 int main()
