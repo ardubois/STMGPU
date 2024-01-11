@@ -63,15 +63,18 @@ STMData* STM_copy_to_device(STMData* stm_data)
     cudaMemcpy(d_tr_state, stm_data->tr_state, numTransactions * sizeof(int)+2, cudaMemcpyHostToDevice);
     meta_data-> tr_state = d_tr_state; // 1 for the always committed Tr and 1 for the always aborted 
 
-    Locator* d_locators;
-    cudaMalloc((void**)&d_locators, (numObjects + (numLocators * numTransactions)) * sizeof(Locator));
-    cudaMemcpy(d_locators, stm_data->locators, (numObjects + (numLocators * numTransactions)) * sizeof(Locator), cudaMemcpyHostToDevice);
-    meta_data-> locators = d_locators; 
-
     int* d_locators_data;
     cudaMalloc((void**)&d_locators_data, ((2*numObjects)+(2*numLocators * numTransactions)) * sizeof(int));
     cudaMemcpy(d_locators_data, stm_data->locators_data, ((2*numObjects)+(2*numLocators * numTransactions)) * sizeof(int), cudaMemcpyHostToDevice);
     meta_data-> locators_data = d_locators_data; 
+
+
+    Locator* d_locators;
+    cudaMalloc((void**)&d_locators, (numObjects + (numLocators * numTransactions)) * sizeof(Locator));
+    fix_pointers_locators(stm_data,d_locators_data);
+    cudaMemcpy(d_locators, stm_data->locators, (numObjects + (numLocators * numTransactions)) * sizeof(Locator), cudaMemcpyHostToDevice);
+    meta_data-> locators = d_locators; 
+
 
     TX_Data* d_tx_data;
     cudaMalloc((void**)&d_tx_data, numTransactions * sizeof(TX_Data));
@@ -592,6 +595,19 @@ __device__ void TX_abort_tr(STMData* stm_data, TX_Data* tx_data){
   //tx_data-> read_set.size = 0;
   //tx_data -> write_set.size = 0;
   tx_data -> n_aborted ++;
+}
+
+void fix_pointers_locators(STMData* stm_data, int* locators_data)
+{
+  int initial_locators = stm_data -> num_locators * stm_data-> num_tr;
+  int num_objects = stm_data -> num_objects;
+  for(i=0; i< (initial_locators+num_objects);i++)
+  {
+
+    stm_data-> locators[i].new_version = locators_data+2*i;
+    stm_data-> locators[i].old_version = locators_data+2*i+1;
+
+  }
 }
 
 void init_objects(STMData* stm_data,int num_objects, int value)
