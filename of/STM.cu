@@ -359,6 +359,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
             case COMMITTED:
               printf("commited\n");
               *new_locator-> old_version =  *locator->new_version;
+              printf("commited primmeiro\n");
               *new_locator-> new_version = *new_locator-> old_version;
               printf("commited depois copia\n");
               break;
