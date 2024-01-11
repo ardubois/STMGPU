@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
   	*flag = 0;
 
 	cudaEventRecord(start); 
-	bank_kernel<<<gridDist, blockDist>>>(flag, seed, prRead, roSize, threadSize, dataSize, blockNum*threads_per_block, stm_data, d_stats, d_times);
+	bank_kernel<<<gridDist, blockDist>>>(flag, seed, prRead, roSize, threadSize, dataSize, blockNum*threads_per_block, d_stm_data, d_stats, d_times);
   	cudaEventRecord(stop);
 		
 	//sleep for a set time to let the kernel run
