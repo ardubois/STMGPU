@@ -28,13 +28,9 @@ __device__ float rand_() {
 __global__
 void foo(STMData* stm_data){
   
-   printf("aqui\n.");
+   
 
-   if(1)
-   {
-    for(int i=0;i<100;i++)
-     printf("ale %d",(int)(rand_()*10));
-   } else{
+   //  printf("ale %d",(int)(rand_()*10)); 0 até 9
    
    int id = threadIdx.x + blockIdx.x * blockDim.x;
    printf("id %d\n", id);
