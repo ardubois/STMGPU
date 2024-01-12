@@ -352,6 +352,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
       Locator* locator = &stm_data -> locators[addr_locator];
    //  print_locator(stm_data,locator);
       int addr_new_locator = TX_new_locator(stm_data,tx_data);
+      int next_locator = tx_data -> locator_queue [tx_data->next_locator];
       Locator *new_locator = &stm_data -> locators[addr_new_locator];
       new_locator -> owner = tx_data->tr_id;
       new_locator -> object = object;
