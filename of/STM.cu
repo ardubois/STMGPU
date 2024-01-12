@@ -355,7 +355,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
       Locator *new_locator = &stm_data -> locators[addr_new_locator];
       new_locator -> owner = tx_data->tr_id;
       new_locator -> object = object;
-      printf("OW: Object %d, Transaction: %d Locator: %d, new Locator %d",object,tx_data->tr_id, addr_locator,addr_new_locator);
+      printf("OW: Object %d, Transaction: %d Locator: %d (Owner %d), new Locator %d\n",object,tx_data->tr_id, addr_locator,locator -> owner,addr_new_locator);
       assert(locator -> owner != new_locator -> owner);
       
       switch (stm_data->tr_state[locator -> owner]) {
