@@ -412,7 +412,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
             write_set -> objects[size] = object;
             write_set -> size ++;
             
-            printf("Write set added: Locator: %d owner %d size%d", addr_new_locator, stm_data -> locators[addr_new_locator].owner, write_set -> size);
+            printf("Write set added: Locator: %d owner %d size%d\n", addr_new_locator, stm_data -> locators[addr_new_locator].owner, write_set -> size);
              
             if(TX_validate_readset(stm_data,tx_data))
               {//print_locator(stm_data,new_locator);
