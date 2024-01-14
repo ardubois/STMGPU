@@ -196,9 +196,10 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 
 			if(stm_data->tr_state[tx_data->tr_id] == COMMITTED)
                         {//trans ++;
-                         // __syncthreads();
+                          __syncthreads();
                           //TX_garbage_collect(stm_data,tx_data);
-                          //__syncthreads();
+						  printf("COMMITED: %d -- ABORTED %d\n",stm_data->tr_state[stm_data-> num_tr],stm_data->tr_state[stm_data-> num_tr+1]);
+                          __syncthreads();
                         }
   			if(stm_data->tr_state[tx_data->tr_id] == ABORTED)
 			{
