@@ -243,8 +243,9 @@ __device__ int TX_new_locator(STMData* stm_data, TX_Data* tx_data)
   tx_data -> next_locator++;
   if(tx_data -> next_locator == MAX_LOCATORS)
     {
+      printf("Max locators reached!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
      assert(tx_data -> next_locator < MAX_LOCATORS);
-     printf("Max locators reached!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    
      //print_stats(stm_data);
      //exit(0);
     }
