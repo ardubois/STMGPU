@@ -80,7 +80,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 
 	//uint64_t state = seed+id;
 	//int id = threadIdx.x + blockIdx.x * blockDim.x;
-   
+    printf("COMMITED: %d -- ABORTED %d\n",stm_data->tr_state[stm_data-> num_tr],stm_data->tr_state[stm_data-> num_tr+1]);
     TX_Data* tx_data = TX_Init(stm_data,id);
 	assert(stm_data->tr_state[stm_data-> num_tr]==COMMITTED && stm_data->tr_state[stm_data-> num_tr+1]==ABORTED);
 	int value=0;
