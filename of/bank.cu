@@ -78,11 +78,8 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 	int rnd;
 	long probRead= prRead;
 
-	//uint64_t state = seed+id;
-	//int id = threadIdx.x + blockIdx.x * blockDim.x;
-    printf("COMMITED: %d -- ABORTED %d\n",stm_data->tr_state[stm_data-> num_tr],stm_data->tr_state[stm_data-> num_tr+1]);
-    TX_Data* tx_data = TX_Init(stm_data,id);
-	assert(stm_data->tr_state[stm_data-> num_tr]==COMMITTED && stm_data->tr_state[stm_data-> num_tr+1]==ABORTED);
+	TX_Data* tx_data = TX_Init(stm_data,id);
+	
 	int value=0;
 	int addr,addr1,addr2;
 	//profile metrics
@@ -331,7 +328,7 @@ int main(int argc, char *argv[])
 	unsigned int blockNum, threads_per_block, roSize, threadSize, dataSize, seed, verbose;
 	int prRead;
    
-   printf("start progran\n");
+ //  printf("start progran\n");
 	
 	Statistics *h_stats, *d_stats;
 	time_rate *d_times, *h_times;
@@ -353,7 +350,7 @@ int main(int argc, char *argv[])
 		printf("%s\n", APP_HELP);
 		exit(EXIT_SUCCESS);
 	}
-   printf("read para\n");
+  // printf("read para\n");
 	seed 				= 1;
 	dataSize			= atoi(argv[argCnt++]);
 	threads_per_block	= atoi(argv[argCnt++]);
@@ -402,10 +399,7 @@ int main(int argc, char *argv[])
     init_objects(stm_data,num_objects,100);
     init_locators(stm_data,num_tx,num_locators);
 
-	assert(stm_data->tr_state[stm_data-> num_tr]==COMMITTED && stm_data->tr_state[stm_data-> num_tr+1]==ABORTED);
-
-    printf("HOST COMMITED: %d -- ABORTED %d\n",stm_data->tr_state[stm_data-> num_tr],stm_data->tr_state[stm_data-> num_tr+1]);
-    STMData *d_stm_data = STM_copy_to_device(stm_data);
+	STMData *d_stm_data = STM_copy_to_device(stm_data);
 
 	float tKernel_ms = 0.0, totT_ms = 0.0;
 	cudaEvent_t start, stop;
