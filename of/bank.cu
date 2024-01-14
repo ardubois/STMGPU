@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
 		printf("%s\n", APP_HELP);
 		exit(EXIT_SUCCESS);
 	}
-
+   printf("read para\n");
 	seed 				= 1;
 	dataSize			= atoi(argv[argCnt++]);
 	threads_per_block	= atoi(argv[argCnt++]);
@@ -363,7 +363,8 @@ int main(int argc, char *argv[])
 #if DISJOINT
 	dataSize=100*blockNum*threads_per_block;
 #endif
-	
+	printf("end read para\n");
+
 	h_times = (time_rate*) calloc(blockNum*threads_per_block,sizeof(time_rate));
 	h_stats = (Statistics*)calloc(1,sizeof(Statistics));
 	

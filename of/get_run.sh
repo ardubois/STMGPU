@@ -6,4 +6,4 @@ cd of
 make clean
 make api
 make
-./teste
+
