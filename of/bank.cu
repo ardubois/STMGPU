@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
     init_objects(stm_data,num_objects,100);
     init_locators(stm_data,num_tx,num_locators);
 
-	assert(stm_data->tr_state[stm_data-> num_tr]==COMMITED && stm_data->tr_state[stm_data-> num_tr+1]==ABORTED);
+	assert(stm_data->tr_state[stm_data-> num_tr]==COMMITTED && stm_data->tr_state[stm_data-> num_tr+1]==ABORTED);
 
 
     STMData *d_stm_data = STM_copy_to_device(stm_data);
