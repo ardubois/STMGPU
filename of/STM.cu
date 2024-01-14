@@ -325,7 +325,7 @@ __device__ int TX_commit(STMData* stm_data, TX_Data* tx_data)
       //TX_free_writeset(stm_data,tx_data, COMMITTED);
       for(int i=0;i<tx_data->write_set.size;i++)
       {
-      printf("\nLocator: %d, owner: %d, me: %d\n\n",tx_data->write_set.locators[i],stm_data->locators[tx_data->write_set.locators[i]].owner,tx_data->tr_id);
+    //  printf("\nLocator: %d, owner: %d, me: %d\n\n",tx_data->write_set.locators[i],stm_data->locators[tx_data->write_set.locators[i]].owner,tx_data->tr_id);
         assert(atomicCAS(&stm_data-> locators[tx_data->write_set.locators[i]].owner,tx_data->tr_id,stm_data-> num_tr)==tx_data->tr_id);
       }
       tx_data -> n_committed ++;
@@ -578,8 +578,8 @@ __device__ void TX_abort_tr(STMData* stm_data, TX_Data* tx_data){
 
 
   for (int i = 0; i < tx_data->write_set.size; i ++)
-  {
-    assert(atomicCAS(&stm_data-> locators[tx_data -> write_set.locators[i]].owner, tx_data->tr_id , (stm_data -> num_tr)+1)==tx_data->tr_id);
+  { printf("\nAbort Locator: %d, owner: %d, me: %d\n\n",tx_data->write_set.locators[i],stm_data->locators[tx_data->write_set.locators[i]].owner,tx_data->tr_id);
+    assert(atomicCAS(&stm_data-> locators[tx_data -> write_set.locators[i]].owner, tx_data->tr_id , (stm_data -> num_tr+1))==tx_data->tr_id);
     //{
      // printf("nao deveria\n owner = %d, id = %d,locaotr: %d\n",stm_data-> locators[tx_data -> write_set.locators[i]].owner,  tx_data->tr_id,tx_data ->write_set.locators[i]);
      //// exit(0);
