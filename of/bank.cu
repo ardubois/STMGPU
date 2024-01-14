@@ -404,7 +404,7 @@ int main(int argc, char *argv[])
 
 	assert(stm_data->tr_state[stm_data-> num_tr]==COMMITTED && stm_data->tr_state[stm_data-> num_tr+1]==ABORTED);
 
-
+    printf("HOST COMMITED: %d -- ABORTED %d\n",stm_data->tr_state[stm_data-> num_tr],stm_data->tr_state[stm_data-> num_tr+1]);
     STMData *d_stm_data = STM_copy_to_device(stm_data);
 
 	float tKernel_ms = 0.0, totT_ms = 0.0;
