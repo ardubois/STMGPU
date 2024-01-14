@@ -9,7 +9,7 @@
 #include <curand.h>
 #include <curand_kernel.h>
 
-#define KERNEL_DURATION 2
+#define KERNEL_DURATION 5
 #define DISJOINT 0
 
 typedef struct Statistics_
