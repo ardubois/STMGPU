@@ -328,7 +328,8 @@ int main(int argc, char *argv[])
 {
 	unsigned int blockNum, threads_per_block, roSize, threadSize, dataSize, seed, verbose;
 	int prRead;
-
+   
+   printf("start progran\n");
 	
 	Statistics *h_stats, *d_stats;
 	time_rate *d_times, *h_times;
