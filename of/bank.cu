@@ -82,6 +82,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 	//int id = threadIdx.x + blockIdx.x * blockDim.x;
    
     TX_Data* tx_data = TX_Init(stm_data,id);
+	assert(stm_data->tr_state[stm_data-> num_tr]==COMMITTED && stm_data->tr_state[stm_data-> num_tr+1]==ABORTED);
 	int value=0;
 	int addr,addr1,addr2;
 	//profile metrics
