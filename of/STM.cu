@@ -398,7 +398,8 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
                
               break;
             default:
-                printf("TX_Read: invalid tr state!\n");
+                printf("TX_Write: invalid tr state! Locator %d, Owner %d, state %d\n",addr_locator,locator -> owner,stm_data->tr_state[locator -> owner]);
+
                 //exit(0);
           }
    
