@@ -19,7 +19,7 @@ STMData* STM_start(int numObjects, int numTransactions, int numLocators)
     meta_data -> n_objects = numObjects;
    // meta_data-> objects_data = malloc(2*numObjects * sizeof(int));
     meta_data-> vboxes = (int*) malloc(numObjects * sizeof(int));
-    meta_data-> tr_state = (int*) malloc(numTransactions * sizeof(int)+2); // 1 for the always committed Tr and 1 for the always aborted 
+    meta_data-> tr_state = (int*) malloc((numTransactions+2) * sizeof(int)); // 1 for the always committed Tr and 1 for the always aborted 
     meta_data-> locators = (Locator*) malloc((numObjects + (numLocators * numTransactions)) * sizeof(Locator));
     meta_data-> locators_data = (int*) malloc(((2*numObjects)+(2*numLocators * numTransactions)) * sizeof(int));
     meta_data -> num_locators = numLocators;
@@ -40,7 +40,7 @@ void STM_copy_from_device(STMData* d_stm_data, STMData* stm_data)
    CUDA_CHECK_ERROR( cudaMemcpy(&local_ddata, d_stm_data,  sizeof(STMData), cudaMemcpyDeviceToHost), " copy stm data");
 
     CUDA_CHECK_ERROR( cudaMemcpy(stm_data->vboxes, local_ddata.vboxes, numObjects * sizeof(int), cudaMemcpyDeviceToHost), " vboxes ");
-    CUDA_CHECK_ERROR( cudaMemcpy(stm_data->tr_state, local_ddata.tr_state, numTransactions * sizeof(int)+2, cudaMemcpyDeviceToHost), " tr state");
+    CUDA_CHECK_ERROR( cudaMemcpy(stm_data->tr_state, local_ddata.tr_state, (numTransactions+2) * sizeof(int), cudaMemcpyDeviceToHost), " tr state");
     cudaMemcpy( stm_data->locators, local_ddata.locators, (numObjects + (numLocators * numTransactions)) * sizeof(Locator), cudaMemcpyDeviceToHost);
     cudaMemcpy(stm_data->locators_data, local_ddata.locators_data,((2*numObjects)+(2*numLocators * numTransactions)) * sizeof(int), cudaMemcpyDeviceToHost);
     cudaMemcpy(stm_data->tx_data, local_ddata.tx_data,numTransactions * sizeof(TX_Data), cudaMemcpyDeviceToHost);
@@ -65,8 +65,8 @@ STMData* STM_copy_to_device(STMData* stm_data)
     meta_data-> vboxes = d_vboxes;
 
     int* d_tr_state;
-    cudaMalloc((void**)&d_tr_state, (numTransactions * sizeof(int))+2);
-    cudaMemcpy(d_tr_state, stm_data->tr_state, (numTransactions * sizeof(int))+3, cudaMemcpyHostToDevice);
+    cudaMalloc((void**)&d_tr_state, (2+numTransactions) * sizeof(int));
+    cudaMemcpy(d_tr_state, stm_data->tr_state, ((2+numTransactions) * sizeof(int)), cudaMemcpyHostToDevice);
     meta_data-> tr_state = d_tr_state; // 1 for the always committed Tr and 1 for the always aborted 
 
     int* d_locators_data;
