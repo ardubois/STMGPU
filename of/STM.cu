@@ -21,6 +21,7 @@ STMData* STM_start(int numObjects, int numTransactions, int numLocators)
     meta_data-> vboxes = (int*) malloc(numObjects * sizeof(int));
     meta_data-> tr_state = (int*) malloc((numTransactions+2) * sizeof(int)); // 1 for the always committed Tr and 1 for the always aborted 
     meta_data-> locators = (Locator*) malloc((numObjects + (numLocators * numTransactions)) * sizeof(Locator));
+    printf("Total locators: %d", (numObjects + (numLocators * numTransactions)));
     meta_data-> locators_data = (int*) malloc(((2*numObjects)+(2*numLocators * numTransactions)) * sizeof(int));
     meta_data -> num_locators = numLocators;
     meta_data -> tx_data  = (TX_Data*) malloc(numTransactions * sizeof(TX_Data));
