@@ -9,4 +9,4 @@ api: STM.cu
 	nvcc -c -rdc=true --maxrregcount 63 STM.cu -o STM.o
 
 clean:
-	rm STM.o teste
+	rm STM.o teste bank
