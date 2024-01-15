@@ -124,7 +124,7 @@ __device__ TX_Data* TX_Init(STMData* stm_data, int tx_id)
     for(int i = 0; i<numLocators;i++)
     {
       d->locator_queue[i] = (tx_id * stm_data -> num_locators) + i;
-      printf("q[%d] = %d\n", i, (tx_id * stm_data -> num_locators) + i);
+     // printf("q[%d] = %d\n", i, (tx_id * stm_data -> num_locators) + i);
     }
 
     return d;
