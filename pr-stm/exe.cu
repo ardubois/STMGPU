@@ -11,6 +11,18 @@
 #include "pr-stm-internal.cuh"
 #include "util.cuh"
 #include <unistd.h>
+#include <curand.h>
+#include <curand_kernel.h>
+
+__device__ float rand_() {
+
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+       curandState state;
+        curand_init(clock64(), i, 0, &state);
+
+       return curand_uniform(&state);
+
+}
 
 typedef struct times_
 {
@@ -47,9 +59,9 @@ __global__ void bank_kernel(int *flag, PR_globalKernelArgs, unsigned int seed, f
 {
 	//local_metadata txData;
 	int id = threadIdx.x + blockIdx.x * blockDim.x;
-	long mod = 0xFFFF;
-	long rnd;
-	long probRead;// = prRead * 0xFFFF;
+	//long mod = 0xFFFF;
+	int rnd;
+	int probRead = prRead;// = prRead * 0xFFFF;
 
 	PR_enterKernel(id);
 
@@ -75,31 +87,24 @@ __global__ void bank_kernel(int *flag, PR_globalKernelArgs, unsigned int seed, f
 	{
 		waitMem = *flag;
 		///////
-		//decide whether the thread will do update or read-only tx
-		if(get_lane_id()==0)
-		{
-			rnd = RAND_R_FNC(state) & mod;
-		}
-		rnd = __shfl_sync(0xffffffff, rnd, 0);
-		probRead = prRead * 0xFFFF;
-		///////
+		rnd = ((int)(rand_()*10)) + 1;     //
 
 		start_time_total = clock64();
 		PR_txBegin();
 		start_time_tx = clock64();
 
 		//Read-Only TX
-		if(rnd < probRead)
+		if(rnd <= probRead)
 		{
 			value=0;
-			for(int i=0; i<dataSize; i++)		//for(int i=0; i<roSize; i++)
+			for(int i=0; i<roSize; i++)		//for(int i=0; i<roSize; i++)
 			{
 		#if DISJOINT					
 				addr = RAND_R_FNC(state)%(max-min+1) + min;
 		#else
-				addr = RAND_R_FNC(state)%dataSize;
+				addr = (int)(rand_()*dataSize);
 		#endif
-				value+=PR_read(&data[i]);
+				value+=PR_read(&data[addr]);
 			}
 			//if(value != 10*dataSize)
 			//	printf("T%d found an invariance fail: %d\n", id, value);
@@ -112,7 +117,7 @@ __global__ void bank_kernel(int *flag, PR_globalKernelArgs, unsigned int seed, f
 		#if DISJOINT					
 				addr = RAND_R_FNC(state)%(max-min+1) + min;
 		#else
-				addr = RAND_R_FNC(state)%dataSize;
+				addr = (int)(rand_()*dataSize);
 		#endif
 				value = PR_read(&data[addr]);
 				PR_write(&data[addr], value-1);
@@ -120,7 +125,7 @@ __global__ void bank_kernel(int *flag, PR_globalKernelArgs, unsigned int seed, f
 		#if DISJOINT					
 				addr = RAND_R_FNC(state)%(max-min+1) + min;
 		#else
-				addr = RAND_R_FNC(state)%dataSize;
+				addr = (int)(rand_()*dataSize);
 		#endif
 				value = PR_read(&data[addr]);
 				PR_write(&data[addr], value+1);
@@ -228,7 +233,7 @@ void TXEnd(int dataSize, int* host_data, int** d_data)
 int main(int argc, char *argv[])
 {
 	unsigned int blockNum, threads_per_block, roSize, upSize, dataSize, seed, verbose;
-	float prRead;
+	int prRead;
 
 	int *h_data, *d_data;
 	
@@ -257,7 +262,7 @@ int main(int argc, char *argv[])
 	dataSize			= atoi(argv[argCnt++]);
 	threads_per_block	= atoi(argv[argCnt++]);
 	blockNum		 	= atoi(argv[argCnt++]);
-	prRead 				= (atoi(argv[argCnt++])/100.0);
+	prRead 				= atoi(argv[argCnt++]);
 	roSize 				= atoi(argv[argCnt++]);
 	upSize				= atoi(argv[argCnt++]);
 	verbose				= atoi(argv[argCnt++]);
