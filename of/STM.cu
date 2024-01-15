@@ -360,7 +360,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
       new_locator -> owner = tx_data->tr_id;
       new_locator -> object = object;
       printf("w2queue[2969] = %d\n",tx_data -> locator_queue[2969]) ;
-      //printf("OW: Object %d, Transaction: %d Locator: %d (Owner %d), new Locator %d, next locator %d, queue %d\n",object,tx_data->tr_id, addr_locator,locator -> owner,addr_new_locator, next_locator,tx_data->next_locator);
+      printf("OW: Object %d, Transaction: %d Locator: %d (Owner %d), new Locator %d, next locator %d, queue %d\n",object,tx_data->tr_id, addr_locator,locator -> owner,addr_new_locator, next_locator,tx_data->next_locator);
       assert(locator -> owner != new_locator -> owner);
       
       switch (stm_data->tr_state[locator -> owner]) {
