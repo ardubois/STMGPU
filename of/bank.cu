@@ -77,8 +77,8 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 	//long mod = 0xFFFF;
 	int rnd;
 	long probRead= prRead;
-
-	TX_Data* tx_data = TX_Init(stm_data,id);
+    int locator_queue[MAX_LOCATORS];
+	TX_Data* tx_data = TX_Init(stm_data,id,locator_queue);
 	
 	int value=0;
 	int addr,addr1,addr2;
