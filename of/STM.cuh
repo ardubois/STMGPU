@@ -70,7 +70,7 @@ STMData* STM_start(int numObjects, int numTransactions, int numLocators);
 STMData* STM_copy_to_device(STMData* stm_data);
 void STM_copy_from_device(STMData* d_stm_data, STMData* stm_data);
 
-__device__ TX_Data* TX_Init(STMData* stm_data, int tx_id);
+__device__ TX_Data* TX_Init(STMData* stm_data, int tx_id, int* locator_queue);
 __device__ void TX_Start(STMData* stm_data, TX_Data* d);
 __device__ int TX_new_locator(STMData* stm_data, TX_Data* tx_data);
 __device__ int TX_validate_readset(STMData* stm_data, TX_Data* tx_data);

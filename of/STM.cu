@@ -101,14 +101,14 @@ STMData* STM_copy_to_device(STMData* stm_data)
     return d_stm_data;
 }
 
-__device__ TX_Data* TX_Init(STMData* stm_data, int tx_id)
+__device__ TX_Data* TX_Init(STMData* stm_data, int tx_id, int* locator_queue)
 {
   
     TX_Data *d = &stm_data -> tx_data[tx_id];
 
     int numLocators = stm_data -> num_locators;
     
-    int locator_queue[MAX_LOCATORS];
+    //int locator_queue[MAX_LOCATORS];
 
     d-> tr_id = tx_id;
     d-> next_locator = 0;
