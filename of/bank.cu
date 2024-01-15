@@ -98,7 +98,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 	max = dataSize/threadNum*(id+1)-1;
 #endif
   int x=0;
-	while(x<1)//while((*flag & 1)==0)
+	while(x<10)//while((*flag & 1)==0)
 	{  x++;
 		waitMem = *flag;
 		wastedTime=0;
