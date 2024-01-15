@@ -124,6 +124,7 @@ __device__ TX_Data* TX_Init(STMData* stm_data, int tx_id)
     for(int i = 0; i<numLocators;i++)
     {
       d->locator_queue[i] = (tx_id * stm_data -> num_locators) + i;
+      printf("q[%d] = %d", i, (tx_id * stm_data -> num_locators) + i);
     }
 
     return d;
@@ -415,7 +416,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
             write_set -> objects[size] = object;
             write_set -> size ++;
             
-            printf("Write set added: Locator: %d owner %d size%d\n", addr_new_locator, stm_data -> locators[addr_new_locator].owner, write_set -> size);
+          //  printf("Write set added: Locator: %d owner %d size%d\n", addr_new_locator, stm_data -> locators[addr_new_locator].owner, write_set -> size);
              
             if(TX_validate_readset(stm_data,tx_data))
               {//print_locator(stm_data,new_locator);
