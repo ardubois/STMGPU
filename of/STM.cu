@@ -21,7 +21,7 @@ STMData* STM_start(int numObjects, int numTransactions, int numLocators)
     meta_data-> vboxes = (int*) malloc(numObjects * sizeof(int));
     meta_data-> tr_state = (int*) malloc((numTransactions+2) * sizeof(int)); // 1 for the always committed Tr and 1 for the always aborted 
     meta_data-> locators = (Locator*) malloc((numObjects + (numLocators * numTransactions)) * sizeof(Locator));
-    printf("Total locators: %d", (numObjects + (numLocators * numTransactions)));
+   // printf("Total locators: %d", (numObjects + (numLocators * numTransactions)));
     meta_data-> locators_data = (int*) malloc(((2*numObjects)+(2*numLocators * numTransactions)) * sizeof(int));
     meta_data -> num_locators = numLocators;
     meta_data -> tx_data  = (TX_Data*) malloc(numTransactions * sizeof(TX_Data));
@@ -358,7 +358,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
       Locator *new_locator = &stm_data -> locators[addr_new_locator];
       new_locator -> owner = tx_data->tr_id;
       new_locator -> object = object;
-    //  printf("OW: Object %d, Transaction: %d Locator: %d (Owner %d), new Locator %d, next locator %d\n",object,tx_data->tr_id, addr_locator,locator -> owner,addr_new_locator, next_locator);
+      printf("OW: Object %d, Transaction: %d Locator: %d (Owner %d), new Locator %d, next locator %d, queue %d\n",object,tx_data->tr_id, addr_locator,locator -> owner,addr_new_locator, next_locator,tx_data->next_locator);
       assert(locator -> owner != new_locator -> owner);
       
       switch (stm_data->tr_state[locator -> owner]) {
