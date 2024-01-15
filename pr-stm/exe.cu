@@ -177,7 +177,7 @@ void getKernelOutput(time_rate *h_times, uint threadNum, int peak_clk, float tot
 	float rt_commit=0.0;
 	rt_commit	=	avg_commit / avg_runtime;
 
-	//printf("nbCommits: %d\n", nbCommits);
+	printf("nbCommits: %d\n", nbCommits);
 	
 	if(verbose)
 		printf("AbortPercent\t%f %%\nThroughtput\t%f\n\nTotal\t\t%f\nRuntime\t\t%f\nCommit\t\t%f\t%.2f%%\nWaste\t\t%f\n",
