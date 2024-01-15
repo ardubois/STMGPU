@@ -170,10 +170,13 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 				{
 					addr1 = (int)(rand_()*dataSize);
                     addr2 = (int)(rand_()*dataSize);
+					printf("1queue[2969] = %d\n",tx_data -> locator_queue[2969]) ;
 					int* ptr1 = TX_Open_Write(stm_data,tx_data,addr1);
+					printf("2queue[2969] = %d\n",tx_data -> locator_queue[2969]) ;
             		if(stm_data->tr_state[tx_data->tr_id] != ABORTED)
             		{
                 		int* ptr2 = TX_Open_Write(stm_data,tx_data,addr2);
+						printf("3queue[2969] = %d\n",tx_data -> locator_queue[2969]) ;
                 		if(ptr2 !=0 )
                 		{
                     		*ptr1 -= 1;
@@ -190,6 +193,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 			}
 			start_time_commit = clock64(); 
 			TX_commit(stm_data,tx_data);
+			printf("4queue[2969] = %d\n",tx_data -> locator_queue[2969]) ;
   			stop_time_commit = clock64();
 
 			if(stm_data->tr_state[tx_data->tr_id] == COMMITTED)
