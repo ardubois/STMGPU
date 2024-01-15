@@ -350,7 +350,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
 
    while (stm_data->tr_state[tx_data->tr_id] != ABORTED)
    {
-    printf("wqueue[2969] = %d\n",tx_data -> locator_queue[2969]) ;
+    printf("wqueue[2970] = %d\n",tx_data -> locator_queue[2970]) ;
        int addr_locator =  stm_data -> vboxes[object];
       Locator* locator = &stm_data -> locators[addr_locator];
    //  print_locator(stm_data,locator);
@@ -364,7 +364,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
       printf("Locator: %d (Owner %d)\n", addr_locator,locator -> owner);
       printf("new Locator %d, next locator %d, queue %d\n",addr_new_locator, next_locator,tx_data->next_locator);
       //printf("OW: Object %d, Transaction: %d Locator: %d (Owner %d), new Locator %d, next locator %d, queue %d\n",object,tx_data->tr_id, addr_locator,locator -> owner,addr_new_locator, next_locator,tx_data->next_locator);
-       printf("w3queue[2969] = %d\n",tx_data -> locator_queue[2969]) ;
+       printf("w3queue[2970] = %d\n",tx_data -> locator_queue[2970]) ;
       assert(locator -> owner != new_locator -> owner);
       
       switch (stm_data->tr_state[locator -> owner]) {
