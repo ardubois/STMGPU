@@ -350,7 +350,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
 
    while (stm_data->tr_state[tx_data->tr_id] != ABORTED)
    {
-    //printf("1queue[2969] = %d\n",tx_data -> locator_queue[2969]) ;
+    printf("wqueue[2969] = %d\n",tx_data -> locator_queue[2969]) ;
        int addr_locator =  stm_data -> vboxes[object];
       Locator* locator = &stm_data -> locators[addr_locator];
    //  print_locator(stm_data,locator);
