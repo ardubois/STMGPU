@@ -540,7 +540,7 @@ __device__  int TX_contention_manager4(STMData* stm_data, TX_Data* tx_data,unsig
 // best 4
 __device__  int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
-  return TX_contention_manager6(stm_data,tx_data, me, enemy);
+  return TX_contention_manager4(stm_data,tx_data, me, enemy);
 }
 
 
@@ -564,14 +564,14 @@ __device__ int TX_Open_Read(STMData* stm_data, TX_Data* tx_data, uint object)
                // exit(0);
           }
 
-    ReadSet* read_set = &tx_data-> read_set;
-    int size = tx_data-> read_set.size;
-    read_set -> locator[size] = addr_locator;
-    read_set -> value[size] = version;
-    read_set -> object[size] = object;
-    read_set -> size ++;
+    
     if(TX_validate_readset(stm_data,tx_data))
-              {
+              {    ReadSet* read_set = &tx_data-> read_set;
+                  int size = tx_data-> read_set.size;
+                  read_set -> locator[size] = addr_locator;
+                  read_set -> value[size] = version;
+                  read_set -> object[size] = object;
+                  read_set -> size ++;
                    return *version;
               }
     atomicCAS(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
