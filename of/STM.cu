@@ -269,6 +269,9 @@ __device__ int TX_new_locator(STMData* stm_data, TX_Data* tx_data)
 
 __device__ int TX_validate_readset(STMData* stm_data, TX_Data* tx_data)
 {
+  if (tx_data-> write_set.size == 0)
+  { return 1; }
+  
   ReadSet* read_set = &tx_data-> read_set;
   int size = tx_data-> read_set.size;
   //int* t = read_set -> locator[size]->new_version;
