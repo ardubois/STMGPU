@@ -445,7 +445,7 @@ __device__  int TX_contention_manager6(STMData* stm_data, TX_Data* tx_data,unsig
   if(tx_data->cm_enemy == enemy)
   { 
     tx_data->cm_aborts ++;
-    if(tx_data->cm_aborts>=1000)
+    if(tx_data->cm_aborts>=10)
       return 1;
   } else {
     tx_data->cm_enemy = enemy;
@@ -535,7 +535,7 @@ __device__  int TX_contention_manager4(STMData* stm_data, TX_Data* tx_data,unsig
 
 __device__  int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
-  return TX_contention_manager4(stm_data,tx_data, me, enemy);
+  return TX_contention_manager6(stm_data,tx_data, me, enemy);
 }
 
 
