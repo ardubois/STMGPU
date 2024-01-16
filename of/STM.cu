@@ -271,7 +271,7 @@ __device__ int TX_validate_readset(STMData* stm_data, TX_Data* tx_data)
 {
   if (tx_data-> write_set.size == 0)
   { return 1; }
-  
+
   ReadSet* read_set = &tx_data-> read_set;
   int size = tx_data-> read_set.size;
   //int* t = read_set -> locator[size]->new_version;
@@ -385,8 +385,8 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
                    *new_locator->old_version = *locator->old_version;
                    *new_locator-> new_version = *new_locator-> old_version;
                   } else {
-                //  __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
-                 // assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
+                  __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
+                  assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
                   tx_data -> next_locator--;
                   continue;
                  }
