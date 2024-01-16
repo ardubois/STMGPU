@@ -397,6 +397,8 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
               } else{
                   // __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
                   // assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
+                   atomicCAS(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
+                  assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
                    tx_data -> next_locator--;
                    continue;
               }
