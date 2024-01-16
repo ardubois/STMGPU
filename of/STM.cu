@@ -385,7 +385,7 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
                    *new_locator->old_version = *locator->old_version;
                    *new_locator-> new_version = *new_locator-> old_version;
                   } else {
-                  __sync_bool_compare_and_swap(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
+                  atomicCAS(&stm_data->tr_state[tx_data->tr_id],ACTIVE ,ABORTED);
                   assert(stm_data->tr_state[tx_data->tr_id]==ABORTED);
                   tx_data -> next_locator--;
                   continue;
