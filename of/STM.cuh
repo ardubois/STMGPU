@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <malloc.h>
 
-#define BACKOFF 200
+#define BACKOFF 10
 #define WriteSetSize	200
 #define ReadSetSize		200
 
