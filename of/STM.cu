@@ -457,7 +457,7 @@ __device__  int TX_contention_manager6(STMData* stm_data, TX_Data* tx_data,unsig
 __device__  int TX_contention_manager7(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
 
-  if(tx_data->cm_aborts > 1000)
+  if(tx_data->cm_aborts > 100)
   { tx_data->cm_aborts =0;
     return 1;
   } else {
