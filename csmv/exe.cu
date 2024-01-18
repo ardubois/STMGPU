@@ -505,7 +505,7 @@ int main(int argc, char *argv[]) {
 	int client_block_size, server_block_size, verbose;
 	int total_client_bk;
 	int dataSize, roSize, upSize;
-	float prRead;
+	int prRead;
 
 	  	const char APP_HELP[] = ""                
 	  "argument order:                     \n"
@@ -530,7 +530,7 @@ int main(int argc, char *argv[]) {
 	client_block_size	= atoi(argv[argCnt++]);
 	total_client_bk	 	= atoi(argv[argCnt++]);
 	server_block_size	= atoi(argv[argCnt++]);
-	prRead 				= (atoi(argv[argCnt++])/100.0);
+	prRead 				= atoi(argv[argCnt++]);
 	roSize 				= atoi(argv[argCnt++]);
 	upSize				= atoi(argv[argCnt++]);
 	verbose				= atoi(argv[argCnt++]);
