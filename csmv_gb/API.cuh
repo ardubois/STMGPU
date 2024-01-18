@@ -1,3 +1,7 @@
+////////////////////
+////	GB2		////
+////////////////////
+
 #ifndef STM_API_H
 #define STM_API_H
 
@@ -5,9 +9,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <assert.h>
+#include <cuda_runtime.h>
+
+#include "../sync_lib/common.h"
 
 #define MaxWriteSetSize		2
-#define MaxReadSetSize		2
+#define MaxReadSetSize		1024
 
 #define TXRecordSize		65536
 #define MaxVersions 		10
@@ -16,8 +24,10 @@
 
 #define bufDec(x)	(x-1+MaxVersions) % MaxVersions
 #define bufInc(x)	(x+1) % MaxVersions
-#define advance_pointer(x) (x+1) % TXRecordSize 	
+#define advance_pointer(x) (x+1) % TXRecordSize
+#define advance_pointer_nb(x,y) (x+y) % TXRecordSize	
 #define decrease_pointer(x) (x-1+TXRecordSize) % TXRecordSize
+#define decrease_pointer_nb(x,y) (x-y+TXRecordSize) % TXRecordSize
 
 #define CUDA_CHECK_ERROR(func, msg) ({ \
 	cudaError_t cudaError; \
@@ -61,6 +71,7 @@ typedef struct metadata_
 	ushort tp;
 	ushort r_hp;
 	int w_hp;
+	bool hasWrapped;
 } TMmetadata;
 
 typedef struct TxRecord_
@@ -95,7 +106,7 @@ typedef struct Statistics_
 	int nbCommits;
 	int nbAbortsRecordAge;
 	int nbAbortsReadWrite;
-	int nbAbortsWriteWrite;
+	int nbAbortsPreValid;
 	int nbAbortsDataAge;
 } Statistics;
 
@@ -104,9 +115,12 @@ typedef struct times_
 	long long int runtime;
 	long long int commit;
 	long long int dataWrite;
-	long long int validation;
+	long long int val1;
+	long long int val2;
 	long long int recordWrite;
 	long long int wait;
+	long long int preValidation;
+	long long int wastedTime;
 	long int comparisons;
 	long int nbReadOnly;
 	long int nbUpdates;
@@ -127,6 +141,9 @@ __device__ int TXReadOnly(VertionedDataItem* data, int addr, uint timestamp, rea
 __device__ int TXAddToRecord(TMmetadata* metadata, TXRecord* TxRecords, readSet* read_log, writeSet* write_log, Statistics* stats, time_rate* times, int timestamp, int tid);
 
 __device__ void TXWriteBack(int newtimestamp, VertionedDataItem* data, writeSet write_log);
+
+__device__ bool TXPreValidation(uint tid, readSet *rs, writeSet *ws);
+
 
 
 #endif

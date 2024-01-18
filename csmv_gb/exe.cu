@@ -1,5 +1,5 @@
 ////////////////////
-////	GB		////
+////	GB2		////
 ////////////////////
 
 #include <stdio.h>
@@ -63,7 +63,7 @@ __device__ __forceinline__ void critcal_section(SERV_ARG_DEF, uint val0, int val
 	//validation
 	//////////////////
 #if PRINT_DEBUG_ == 0
-	if(get_lane_id()==0) printf("\t\tS%d: recv %d %d\n", thread_id_x()/32, tid/32, timestamp);
+	if(get_lane_id()==0) printf("\t\t\tS%d: recv %d %d\n", thread_id_x()/32, tid/32, timestamp);
 #endif
 
 	result=TXAddToRecord(metadata, records, rs, ws, stats, times, timestamp, tid);
@@ -76,11 +76,6 @@ __device__ __forceinline__ void critcal_section(SERV_ARG_DEF, uint val0, int val
 	__threadfence();
 	if(get_lane_id() == 0)
 		wRes[tid/32].valid_entry=1;
-
-#if PRINT_DEBUG_ == 0
-	if(get_lane_id()==0) printf("\t\t\t\tS%d: finished sending to %d\n", thread_id_x()/32, tid/32);
-#endif
-
 }
 
 #include "../sync_lib/one_phase_def.h"
@@ -106,7 +101,7 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 	__syncthreads();
 
 	uint64_t state = seed+tid;
-	int value, timestamp, addr, result;
+	int value1, value2, timestamp, addr1, addr2, result;
 	bool isAborted;
 
 	uint dst = 0;
@@ -116,14 +111,16 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 	uint valid_msg, retry=1;
 	uint saved_write_ptr = NOT_FOUND;
 
-	long long int start_writeback, stop_writeback;
+	long long int start_writeback=0, stop_writeback=0;
 	long long int start_time_commit, stop_time_commit;
 	long long int start_time_tx, stop_time_tx;
 	long long int start_wait=0, stop_wait=0;
+	long long int start_preVal=0, stop_preVal=0;
+	long long int stop_aborted_tx=0, wastedTime=0;
 
 	long int updates=0, reads=0;
-#if DISJOINT
 	//disjoint accesses variables
+#if DISJOINT
 	int min, max;
 	min = dataSize/threadNum*tid;
 	max = dataSize/threadNum*(tid+1)-1;
@@ -133,7 +130,7 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 	{
 		waitMem = *flag;
 		retry=1;
-
+		wastedTime=0;
 		///////
 		//decide whether the warp will be do update or read-only set of txs
 		if(get_lane_id()==0)
@@ -154,21 +151,22 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 			//Read-Only TX
 			if(rnd < probRead)
 			{
-				for(int i=0, value=0; i<roSize && isAborted==false; i++)
+				value1=0;
+				for(int i=0; i<dataSize && isAborted==false; i++)//for(int i=0; i<roSize && isAborted==false; i++)
 				{
 			#if DISJOINT					
-					addr = RAND_R_FNC(state)%(max-min+1) + min;
+//					addr1 = RAND_R_FNC(state)%(max-min+1) + min;
 			#else
-					addr = RAND_R_FNC(state)%dataSize;
+//					addr1 = RAND_R_FNC(state)%dataSize;
 			#endif
-					value+=TXReadOnly(data, addr, timestamp, rs, ws, tid, &isAborted);
+					if(retry==1)value1+=TXReadOnly(data, i, timestamp, rs, ws, tid, &isAborted);
 				}
 				if(isAborted==true)
 				{
 					atomicAdd(&(stats->nbAbortsDataAge), 1);
 					continue;
 				}
-				//printf("t%d: ro %d\n", id, value);
+				//assert(value1 == 1000*dataSize);
 			}
 			//Update TX
 			else
@@ -176,20 +174,20 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 				for(int i=0; i<upSize && isAborted==false; i++)
 				{
 			#if DISJOINT					
-					addr = RAND_R_FNC(state)%(max-min+1) + min;
+					addr1 = RAND_R_FNC(state)%(max-min+1) + min;
 			#else
-					addr = RAND_R_FNC(state)%dataSize;
+					addr1 = RAND_R_FNC(state)%dataSize;
 			#endif
-					value = TXRead(data, addr, timestamp, rs, ws, tid, &isAborted); 
-					TXWrite(data, value-(tid*10+100), addr, ws, tid);
-
+					value1 = TXRead(data, addr1, timestamp, rs, ws, tid, &isAborted); 
+					if(retry==1)TXWrite(data, value1-(1), addr1, ws, tid);
+			
 			#if DISJOINT					
-					addr = RAND_R_FNC(state)%(max-min+1) + min;
+					addr2 = RAND_R_FNC(state)%(max-min+1) + min;
 			#else
-					addr = RAND_R_FNC(state)%dataSize;
+					addr2 = RAND_R_FNC(state)%dataSize;
 			#endif
-					value = TXRead(data, addr, timestamp, rs, ws, tid, &isAborted); 
-					TXWrite(data, value+(tid*10+100), addr, ws, tid);
+					value2 = TXRead(data, addr2, timestamp, rs, ws, tid, &isAborted); 
+					if(retry==1)TXWrite(data, value2+(1), addr2, ws, tid);
 				}
 				if(isAborted==true)
 				{
@@ -201,9 +199,10 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 			/////////////////////////////
 			//Commit process
 			/////////////////////////////
-			if(retry==1)start_time_commit = clock64();
+			if(retry==1) start_time_commit = clock64();
 			if(rnd < probRead)
 			{
+				start_preVal = stop_preVal = clock64();
 				start_wait = stop_wait = clock64();
 				start_writeback = clock64();
 				atomicAdd(&(stats->nbCommits), 1);
@@ -215,8 +214,17 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 			}
 			else
 			{
+				if(retry==1) start_preVal = clock64();
+				isAborted = !TXPreValidation(tid, rs, ws);
+				if(retry==1) stop_preVal = clock64();
+
 				if(retry==0)
 					val1=-1;
+				else if( isAborted )
+				{
+					atomicAdd(&(stats->nbAbortsPreValid), 1);
+					val1=-1;
+				}	
 				else
 					val1=timestamp;
 				
@@ -230,11 +238,12 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 						valid_msg = 0;
 				}
 				while(vote_ballot(valid_msg) != 0);
-				
+
 				if(get_lane_id()==0)
 					while(wRes[wid].valid_entry==0);
 				result = wRes[wid].lane_result[get_lane_id()];
 				if(retry==1) stop_wait = clock64();
+
 
 				if(result != 0)
 				{
@@ -247,18 +256,32 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 					retry=0;
 					updates++;
 				}
+				else if(retry==1)
+				{
+					stop_aborted_tx = clock64();
+					wastedTime += stop_aborted_tx - start_time_tx;
+				}
 				//reset scoreboard
 				if(get_lane_id()==0)
 					wRes[wid].valid_entry=0;
 			}
+			//stop_time_commit = clock64();
+
+	#if PRINT_DEBUG == 0				
+		if(thread_id_x()==0) printf("C%d: nbCommits: %d\n", blockIdx.x, stats->nbCommits);
+	#endif
+			
+
 		}while(vote_ballot(retry) != 0);
-		
-		times[tid].runtime 	+= stop_time_tx - start_time_tx;
-		times[tid].commit 	+= stop_time_commit - start_time_commit;
-		times[tid].dataWrite+= stop_writeback - start_writeback;
-		times[tid].wait 	+= stop_wait - start_wait;
+
+		times[tid].runtime 		 += stop_time_tx - start_time_tx;
+		times[tid].commit 		 += stop_time_commit - start_time_commit;
+		times[tid].dataWrite	 += stop_writeback - start_writeback;
+		times[tid].wait 		 += stop_wait - start_wait;
+		times[tid].preValidation += stop_preVal - start_preVal;
+		times[tid].wastedTime	 += wastedTime;
 	}
-	
+
 	times[tid].nbReadOnly = reads;
 	times[tid].nbUpdates  = updates;
 
@@ -285,23 +308,24 @@ __device__ void worker_thread(gbc_pack_t gbc_pack, SERV_ARG_DEF)
 __global__ void server_kernel(gbc_pack_t gbc_pack, readSet* rs, writeSet* ws, TXRecord* records, warpResult* wRes, Statistics* stats, time_rate* times)
 {
 	__shared__ TMmetadata metadata;
-	//__shared__ uint txNumber[TXRecordSize];
+	//__shared__ TXRecord records[TXRecordSize];
+	metadata.r_hp=1;
+	metadata.w_hp=1;
+	metadata.hasWrapped = false;
 
 	init_recv(gbc_pack);
 	gc_receiver_leader(gbc_pack);
 	while(1)
 	{
 		worker_thread(gbc_pack, &metadata, records, rs, ws, wRes, stats, times);
+		//if(++stage_buf>=16) stage_buf=0;
 	}
 }
 
 
 __global__ void parent_kernel(int *flag, uint total_sender_bk, uint sender_block_size,	uint total_recevier_bk, uint recv_block_size, gbc_pack_t gbc_pack,
 								uint64_t seed, uint dataSize, VertionedDataItem* data, readSet* rs, writeSet* ws, TXRecord* records, warpResult* wRes,
-								float prRead, int roSize, int upSize, Statistics* stats, time_rate* times) {
-
-//	for(int i=0; i<SCOREBOARD_SIZE/32; i++)
-//		validSB[i]=0;
+								float prRead, int roSize, int upSize, Statistics* stats, time_rate* times) {	
 	cudaStream_t s2;
 	cudaStreamCreateWithFlags(&s2, cudaStreamNonBlocking);
 
@@ -326,7 +350,7 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
 	gbc_pack_t gbc_pack;
 	create_gbc(gbc_pack, total_client_bk, client_block_size, server_block_size);
 ///////////////
-	
+
 	int* bankArray;
 	VertionedDataItem *h_data, *d_data;
 	TXRecord* records;
@@ -348,12 +372,12 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
 	h_times = (time_rate*) calloc(total_client_bk*client_block_size,sizeof(time_rate));
 	h_stats = (Statistics*)calloc(1,sizeof(Statistics));
 
-
 	bankArray = (int*)malloc(dataSize*sizeof(int));
 	for(int i=0; i<dataSize; i++)
 	{
-		bankArray[i]=1000;
+		bankArray[i]=10;
 	}
+	
 	//Allocate memory in the device
 	cudaError_t result;
 	result = TXInit(bankArray, dataSize, client_block_size*total_client_bk, &h_data, &d_data, &rs, &ws, &records, &wRes);
@@ -373,13 +397,12 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
 
 	///////////////
 	//kernel stuff
-	cudaEventRecord(start);
+  	cudaEventRecord(start);
 	parent_kernel<<<1, 1>>>(flag, total_client_bk, client_block_size,
 								total_server_bk, server_block_size, gbc_pack,
 								1, dataSize, d_data, rs, ws, records, wRes,
 								prRead, roSize, upSize, d_stats, d_times);
 	cudaEventRecord(stop);
-
 	//sleep for a set time to let the kernel run
 	sleep(KERNEL_DURATION);
 	//send termination message to the kernel and wait for a return
@@ -392,6 +415,7 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
 	cudaEventElapsedTime(&tKernel_ms, start, stop);
 	totT_ms += tKernel_ms;
 
+
 	free_gbc(gbc_pack);
 	TXEnd(dataSize, h_data, &d_data, &rs, &ws, &wRes);
 
@@ -400,7 +424,7 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
   	cudaMemcpy(h_times, d_times, total_client_bk*client_block_size*sizeof(time_rate), cudaMemcpyDeviceToHost);
 
   	//Treat the data to generate output
-	double avg_runtime=0, avg_commit=0, avg_wb=0, avg_val=0, avg_rwb=0, avg_wait=0, avg_comp=0, avg_send=0;
+	double avg_runtime=0, avg_commit=0, avg_wb=0, avg_val1=0, avg_val2=0, avg_rwb=0, avg_wait=0, avg_comp=0, avg_pv=0, avg_waste=0;
 	long int totUpdates=0, totReads=0;
 	for(int i=0; i<total_client_bk*client_block_size; i++)
 	{
@@ -408,82 +432,94 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
 		avg_runtime += h_times[i].runtime;
 		avg_commit 	+= h_times[i].commit;
 		avg_wb 		+= h_times[i].dataWrite;
-		avg_val		+= h_times[i].validation;
+		avg_val1	+= h_times[i].val1;
+		avg_val2	+= h_times[i].val2;
 		avg_rwb		+= h_times[i].recordWrite;
 		avg_wait	+= h_times[i].wait;
 		avg_comp 	+= h_times[i].comparisons;
-	
+		avg_pv		+= h_times[i].preValidation;
+		avg_waste	+= h_times[i].wastedTime;
+
 		totUpdates 	+= h_times[i].nbUpdates;
 		totReads	+= h_times[i].nbReadOnly;
 	}
-	avg_wait = avg_wait - avg_rwb - avg_val;
+	avg_wait = avg_wait - avg_rwb - avg_val1 - avg_val2;
+
 	long int denom = (long)h_stats->nbCommits*peak_clk;
 	avg_runtime	/= denom;
 	avg_commit 	/= denom;
 	avg_wb 		/= denom;
-	avg_val 	/= denom;
+	avg_val1 	/= denom;
+	avg_val2 	/= denom;
 	avg_rwb 	/= denom;
 	avg_wait	/= denom;
 	avg_comp	/= h_stats->nbCommits;
+	avg_pv		/= denom;
+	avg_waste	/= denom;
 
-	float rt_commit=0.0, rt_wb=0.0, rt_val=0.0, rt_rwb=0.0, rt_wait=0.0, rt_send=0.0;
+	float rt_commit=0.0, rt_wb=0.0, rt_val1=0.0, rt_val2=0.0, rt_rwb=0.0, rt_wait=0.0, rt_pv=0.0;
 	rt_commit	=	avg_commit / avg_runtime;
 	rt_wb	 	=	avg_wb / avg_runtime;
-	rt_val	 	=	avg_val / avg_runtime;
+	rt_val1	 	=	avg_val1 / avg_runtime;
+	rt_val2	 	=	avg_val2 / avg_runtime;
 	rt_rwb	 	=	avg_rwb / avg_runtime;
 	rt_wait		=	avg_wait / avg_runtime;
+	rt_pv		=	avg_pv / avg_runtime;
 
-	int nbAborts = h_stats->nbAbortsDataAge + h_stats->nbAbortsRecordAge + h_stats->nbAbortsReadWrite + h_stats->nbAbortsWriteWrite;
+	int nbAborts = h_stats->nbAbortsDataAge + h_stats->nbAbortsRecordAge + h_stats->nbAbortsReadWrite + h_stats->nbAbortsPreValid;
 
 	if(verbose)
-		printf("AbortPercent\t%f %%\nThroughtput\t%f\n\nAbortDataAge\t%f %%\nAbortRecAge\t%f %%\nAbortReadWrite\t%f %%\nAbortPreVal\t%f %%\n\nRuntime\t\t%f\nCommit\t\t%f\t%.2f%%\nWaitTime\t%f\t%.2f%%\nPreValidation\t%f\t%.2f%%\nValidation\t%f\t%.2f%%\nRecInsert\t%f\t%.2f%%\nWriteBack\t%f\t%.2f%%\n\nComparisons\t%f\nTotalUpdates\t%d\nTotalReads\t%d\n", 
+		printf("AbortPercent\t%f %%\nThroughtput\t%f\n\nAbortDataAge\t%f %%\nAbortRecAge\t%f %%\nAbortReadWrite\t%f %%\nAbortPreVal\t%f %%\n\nRuntime\t\t%f\nCommit\t\t%f\t%.2f%%\nWaitTime\t%f\t%.2f%%\nPreValidation\t%f\t%.2f%%\n1stValidation\t%f\t%.2f%%\nRecInsertVals\t%f\t%.2f%%\nRecInsert\t%f\t%.2f%%\nWriteBack\t%f\t%.2f%%\nWaste\t\t%f\n\nComparisons\t%f\nTotalUpdates\t%d\nTotalReads\t%d\n", 
 			(float)nbAborts/(nbAborts+h_stats->nbCommits)*100.0,
 			h_stats->nbCommits/totT_ms*1000.0,
 			(float)h_stats->nbAbortsDataAge/(nbAborts+h_stats->nbCommits)*100.0,
 			(float)h_stats->nbAbortsRecordAge/(nbAborts+h_stats->nbCommits)*100.0,
 			(float)h_stats->nbAbortsReadWrite/(nbAborts+h_stats->nbCommits)*100.0,
-			(float)h_stats->nbAbortsWriteWrite/(nbAborts+h_stats->nbCommits)*100.0,
+			(float)h_stats->nbAbortsPreValid/(nbAborts+h_stats->nbCommits)*100.0,
 			avg_runtime,
 			avg_commit,
 			rt_commit*100.0,
 			avg_wait,
 			rt_wait*100.0,
-			avg_send,
-			rt_send*100.0,
-			avg_val,
-			rt_val*100.0,
+			avg_pv,
+			rt_pv*100.0,
+			avg_val1,
+			rt_val1*100.0,
+			avg_val2,
+			rt_val2*100.0,
 			avg_rwb,
 			rt_rwb*100.0,
 			avg_wb,
 			rt_wb*100.0,
+			avg_waste,
 			avg_comp,
 			totUpdates,
 			totReads
 			);
 	else
-		printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%d\t%d\n", 
+		printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", 
 			(float)nbAborts/(nbAborts+h_stats->nbCommits)*100.0,
 			h_stats->nbCommits/totT_ms*1000.0,
 			(float)h_stats->nbAbortsDataAge/(nbAborts+h_stats->nbCommits)*100.0,
 			(float)h_stats->nbAbortsRecordAge/(nbAborts+h_stats->nbCommits)*100.0,
 			(float)h_stats->nbAbortsReadWrite/(nbAborts+h_stats->nbCommits)*100.0,
-			(float)h_stats->nbAbortsWriteWrite/(nbAborts+h_stats->nbCommits)*100.0,
+			(float)h_stats->nbAbortsPreValid/(nbAborts+h_stats->nbCommits)*100.0,
 			avg_runtime,
 			avg_commit,
 			rt_commit*100.0,
 			avg_wait,
 			rt_wait*100.0,
-			avg_send,
-			rt_send*100.0,
-			avg_val,
-			rt_val*100.0,
+			avg_pv,
+			rt_pv*100.0,
+			avg_val1,
+			rt_val1*100.0,
+			avg_val2,
+			rt_val2*100.0,
 			avg_rwb,
 			rt_rwb*100.0,
 			avg_wb,
 			rt_wb*100.0,
-			avg_comp,
-			totUpdates,
-			totReads
+			avg_waste
 			);
 
 	free(h_stats);
@@ -508,7 +544,7 @@ int main(int argc, char *argv[]) {
 	  "  5) prob read TX                   \n"
 	  "  6) read TX Size                   \n"
 	  "  7) update TX Size                 \n"
-	  "  8) verbose		                   \n"
+	  "  8) verbose		                   \n"	  
 	"";
 	const int NB_ARGS = 9;
 	int argCnt = 1;
@@ -530,7 +566,7 @@ int main(int argc, char *argv[]) {
 #if DISJOINT
 	dataSize=10*total_client_bk*client_block_size;
 #endif
-
+	
 	cudaSetDevice(0);
 	for (int i = 0; i < 1; i++) {
 		test_fine_grain_offloading(i, dataSize, client_block_size, total_client_bk, server_block_size, prRead, roSize, upSize, verbose);
