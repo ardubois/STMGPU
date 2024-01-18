@@ -151,7 +151,7 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 		///////
 		
 		rnd = ((int)(rand_()*10)) + 1;  
-
+        printf("inicio\n")
 		do
 		{
 			if(retry==1)start_time_tx = clock64();
