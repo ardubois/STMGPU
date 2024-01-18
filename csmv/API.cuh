@@ -6,8 +6,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define MaxWriteSetSize		2
-#define MaxReadSetSize		2
+#define MaxWriteSetSize		50
+#define MaxReadSetSize		50
 
 #define TXRecordSize		65536
 #define MaxVersions 		10
