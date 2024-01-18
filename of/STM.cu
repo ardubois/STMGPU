@@ -719,7 +719,12 @@ void print_stats(STMData* stm_data)
    //  print_locator(stm_data,loc);
    // }
    // assert(stm_data->tr_state[loc->owner] == COMMITTED);
+   if (stm_data->tr_state[loc->owner] == COMMITTED)
+   {
     total += *loc -> new_version;
+   } else{
+    total += *loc -> old_version;
+   }
   }
   printf("Total data: %d\n",total);
 }
