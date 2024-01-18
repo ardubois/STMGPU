@@ -33,6 +33,20 @@
 #include "../sync_lib/common.h"
 #include "API.cuh"
 
+#include <curand.h>
+#include <curand_kernel.h>
+
+__device__ float rand_() {
+
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+       curandState state;
+        curand_init(clock64(), i, 0, &state);
+
+       return curand_uniform(&state);
+
+}
+
+
 /*
  * app specific config
  */
@@ -91,7 +105,7 @@ __device__ __forceinline__ void critcal_section(SERV_ARG_DEF, uint val0, int val
 
 __device__ int waitMem;
 
-__global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNum, uint dataSize, VertionedDataItem* data, readSet* rs, writeSet* ws, warpResult* wRes, float prRead, int roSize, int upSize, 
+__global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNum, uint dataSize, VertionedDataItem* data, readSet* rs, writeSet* ws, warpResult* wRes, int prRead, int roSize, int upSize, 
 								Statistics* stats, time_rate* times) {
 
 	uint tid = threadIdx.x + blockIdx.x * blockDim.x;
@@ -99,7 +113,7 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 
 	long mod = 0xFFFF;
 	long rnd;
-	long probRead;// = prRead * 0xFFFF;
+	int probRead = prRead; 
 
 	init_base(_offload_tail_ptr_cpy);
 
@@ -135,14 +149,8 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 		retry=1;
 
 		///////
-		//decide whether the warp will be do update or read-only set of txs
-		if(get_lane_id()==0)
-		{
-			rnd = RAND_R_FNC(state) & mod;
-		}
-		rnd = __shfl_sync(0xffffffff, rnd, 0);
-		probRead = prRead * 0xFFFF;
-		///////
+		
+		rnd = ((int)(rand_()*10)) + 1;  
 
 		do
 		{
@@ -152,14 +160,14 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 			valid_msg = 1;
 
 			//Read-Only TX
-			if(rnd < probRead)
+			if(rnd <= probRead)
 			{
 				for(int i=0, value=0; i<roSize && isAborted==false; i++)
 				{
 			#if DISJOINT					
 					addr = RAND_R_FNC(state)%(max-min+1) + min;
 			#else
-					addr = RAND_R_FNC(state)%dataSize;
+					addr = (int)(rand_()*dataSize);
 			#endif
 					value+=TXReadOnly(data, addr, timestamp, rs, ws, tid, &isAborted);
 				}
@@ -178,7 +186,7 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 			#if DISJOINT					
 					addr = RAND_R_FNC(state)%(max-min+1) + min;
 			#else
-					addr = RAND_R_FNC(state)%dataSize;
+					addr = (int)(rand_()*dataSize);
 			#endif
 					value = TXRead(data, addr, timestamp, rs, ws, tid, &isAborted); 
 					TXWrite(data, value-(tid*10+100), addr, ws, tid);
@@ -186,7 +194,7 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 			#if DISJOINT					
 					addr = RAND_R_FNC(state)%(max-min+1) + min;
 			#else
-					addr = RAND_R_FNC(state)%dataSize;
+					addr = (int)(rand_()*dataSize);
 			#endif
 					value = TXRead(data, addr, timestamp, rs, ws, tid, &isAborted); 
 					TXWrite(data, value+(tid*10+100), addr, ws, tid);
@@ -434,7 +442,7 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
 	rt_wait		=	avg_wait / avg_runtime;
 
 	int nbAborts = h_stats->nbAbortsDataAge + h_stats->nbAbortsRecordAge + h_stats->nbAbortsReadWrite + h_stats->nbAbortsWriteWrite;
-
+    printf("nbCommits: %d\n", h_stats->nbCommits);
 	if(verbose)
 		printf("AbortPercent\t%f %%\nThroughtput\t%f\n\nAbortDataAge\t%f %%\nAbortRecAge\t%f %%\nAbortReadWrite\t%f %%\nAbortPreVal\t%f %%\n\nRuntime\t\t%f\nCommit\t\t%f\t%.2f%%\nWaitTime\t%f\t%.2f%%\nPreValidation\t%f\t%.2f%%\nValidation\t%f\t%.2f%%\nRecInsert\t%f\t%.2f%%\nWriteBack\t%f\t%.2f%%\n\nComparisons\t%f\nTotalUpdates\t%d\nTotalReads\t%d\n", 
 			(float)nbAborts/(nbAborts+h_stats->nbCommits)*100.0,
