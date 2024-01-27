@@ -319,7 +319,7 @@ if(assign_size != 32)
 				//this server knows when to exit when all the clients are finished
 				//exit condition check
 				uint exit_check_counter = leader_exit_check[channel];
-				printf("chanel exit %d\n", exit_check_counter);
+				
 				if (exit_check_counter == 256) {
 					if ((*(gbc_pack.gbc[channel].exit_counter_global)) == 0) {
 						if (get_lane_id() == 0) {
@@ -331,6 +331,7 @@ if(assign_size != 32)
 						}
 					}
 				} else if (exit_check_counter == 512) {
+					printf("chanel exit %d\n", exit_check_counter);
 					//the point is that we must check bitmask array after G count reaches 0
 					if (leader_head_ptr[channel]
 							== gbc_pack.gbc[channel].write_ptr[block_id_x()]) {
