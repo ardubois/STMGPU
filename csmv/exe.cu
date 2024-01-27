@@ -275,7 +275,7 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 }
 
 __device__ void worker_thread(gbc_pack_t gbc_pack, SERV_ARG_DEF)
-{
+{  printf("worker thread\n");
 	uint m_warp_id = thread_id_x() / 32;
 
 	VAR_BUF_DEF0
@@ -294,7 +294,7 @@ __global__ void server_kernel(gbc_pack_t gbc_pack, readSet* rs, writeSet* ws, TX
 {
 	__shared__ TMmetadata metadata;
 	//__shared__ uint txNumber[TXRecordSize];
-
+    printf("server kernel\n");
 	init_recv(gbc_pack);
 	gc_receiver_leader(gbc_pack);
 	while(1)
@@ -310,6 +310,7 @@ __global__ void parent_kernel(int *flag, uint total_sender_bk, uint sender_block
 
 //	for(int i=0; i<SCOREBOARD_SIZE/32; i++)
 //		validSB[i]=0;
+    printf("parent kernel\n");
 	cudaStream_t s2;
 	cudaStreamCreateWithFlags(&s2, cudaStreamNonBlocking);
 
@@ -378,8 +379,7 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
 	int *flag;
   	CUDA_CHECK_ERROR(cudaMallocManaged(&flag, sizeof(int)), "Could not alloc");
   	*flag = 0;
-     printf("before kernel launch.\n");
-	 assert(0);
+     
 	///////////////
 	//kernel stuff
 	cudaEventRecord(start);
@@ -391,6 +391,7 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
 
 	//sleep for a set time to let the kernel run
 	sleep(KERNEL_DURATION);
+	assert(0);
 	//send termination message to the kernel and wait for a return
 	__atomic_fetch_add(flag, 1, __ATOMIC_ACQ_REL);
 
