@@ -19,8 +19,7 @@
 ///////////////////////////
 //gc receiver
 __device__ void init_recv(gbc_pack_t gbc_pack) {
-   printf("inside init\n");
-	if (threadIdx.x / 32 == 0) {
+ 	if (threadIdx.x / 32 == 0) {
 		for (int channel = 0; channel < NUM_CHANNEL; channel++) {
 			uint ini_data = 0;
 			uint buff_status = 0;
@@ -55,9 +54,7 @@ __device__ void init_recv(gbc_pack_t gbc_pack) {
 
 		}
 	}
-	printf("end init\n");
 	__syncthreads();
-    printf("after sync\n");	
 }
 
 __device__ bool leader_exit_channel(gbc_t target_gbc, uint channel) {
@@ -109,6 +106,7 @@ __device__ void gc_receiver_leader(gbc_pack_t gbc_pack) {
 #endif
 
 	while (channel_exit_counter != 0) {
+		printf("chanel exit %d\n", channel_exit_counter);
 
 		for (int channel = channel_begin; channel <= channel_end; channel++) {
 			if (!leader_terminate[channel]) {
