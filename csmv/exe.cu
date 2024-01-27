@@ -393,7 +393,7 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
 
 	//sleep for a set time to let the kernel run
 	sleep(KERNEL_DURATION);
-	//assert(0);
+	assert(0);
 	//send termination message to the kernel and wait for a return
 	__atomic_fetch_add(flag, 1, __ATOMIC_ACQ_REL);
 
