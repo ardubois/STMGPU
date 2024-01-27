@@ -65,7 +65,7 @@ __device__ float rand_() {
 
 #define PERF_METRICS 1
 #define DISJOINT 0
-#define KERNEL_DURATION 2
+#define KERNEL_DURATION 4
 
 __device__ __forceinline__ void critcal_section(SERV_ARG_DEF, uint val0, int val1)
 {
