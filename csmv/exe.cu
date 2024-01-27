@@ -378,7 +378,8 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
 	int *flag;
   	CUDA_CHECK_ERROR(cudaMallocManaged(&flag, sizeof(int)), "Could not alloc");
   	*flag = 0;
-
+     printf("before kernel launch.\n");
+	 assert(0);
 	///////////////
 	//kernel stuff
 	cudaEventRecord(start);
