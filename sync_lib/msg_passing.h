@@ -57,6 +57,7 @@ __device__ void init_recv(gbc_pack_t gbc_pack) {
 	}
 	printf("end init\n");
 	__syncthreads();
+    printf("after sync\n");	
 }
 
 __device__ bool leader_exit_channel(gbc_t target_gbc, uint channel) {
