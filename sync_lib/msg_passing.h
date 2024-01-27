@@ -19,7 +19,7 @@
 ///////////////////////////
 //gc receiver
 __device__ void init_recv(gbc_pack_t gbc_pack) {
-   printf("inside init");
+   printf("inside init\n");
 	if (threadIdx.x / 32 == 0) {
 		for (int channel = 0; channel < NUM_CHANNEL; channel++) {
 			uint ini_data = 0;
@@ -55,6 +55,7 @@ __device__ void init_recv(gbc_pack_t gbc_pack) {
 
 		}
 	}
+	printf("end init\n");
 	__syncthreads();
 }
 
