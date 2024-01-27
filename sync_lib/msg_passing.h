@@ -106,7 +106,7 @@ __device__ void gc_receiver_leader(gbc_pack_t gbc_pack) {
 #endif
 
 	while (channel_exit_counter != 0) {
-		printf("chanel exit %d\n", channel_exit_counter);
+		
 
 		for (int channel = channel_begin; channel <= channel_end; channel++) {
 			if (!leader_terminate[channel]) {
@@ -319,6 +319,7 @@ if(assign_size != 32)
 				//this server knows when to exit when all the clients are finished
 				//exit condition check
 				uint exit_check_counter = leader_exit_check[channel];
+				printf("chanel exit %d\n", exit_check_counter);
 				if (exit_check_counter == 256) {
 					if ((*(gbc_pack.gbc[channel].exit_counter_global)) == 0) {
 						if (get_lane_id() == 0) {
