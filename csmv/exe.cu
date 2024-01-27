@@ -151,7 +151,7 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 		///////
 		
 		rnd = ((int)(rand_()*10)) + 1;  
-        printf("inicio\n");
+        //printf("inicio\n");
 		do
 		{
 			if(retry==1)start_time_tx = clock64();
@@ -296,7 +296,9 @@ __global__ void server_kernel(gbc_pack_t gbc_pack, readSet* rs, writeSet* ws, TX
 	//__shared__ uint txNumber[TXRecordSize];
     printf("server kernel\n");
 	init_recv(gbc_pack);
+	 printf("init recv\n");
 	gc_receiver_leader(gbc_pack);
+	 printf("leader\n");
 	while(1)
 	{
 		worker_thread(gbc_pack, &metadata, records, rs, ws, wRes, stats, times);
