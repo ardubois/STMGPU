@@ -330,6 +330,13 @@ int main(int argc, char *argv[])
 	cudaEventRecord(start);
 	PR_prepare_noCallback(&args);
 	bank_kernel<<<gridDist, blockDist>>>(flag, args.dev, seed, prRead, roSize, upSize, dataSize, blockNum*threads_per_block, d_data, d_times);
+	
+	cudaError_t error_gpu = cudaGetLastError();
+    if(error_gpu != cudaSuccess)
+     { printf("Error kernel call: %s", cudaGetErrorString(error_gpu));
+       
+     }
+	
 	PR_postrun_noCallback(&args);
   	cudaEventRecord(stop);
 		
