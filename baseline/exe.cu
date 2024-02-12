@@ -84,6 +84,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 			TXBegin(*metadata, &txData);
 			
 			//Read-Only TX
+			printf("Prob read: %d rand %d\n", probRead,rnd)
 			if(rnd <= probRead)
 			{
 				value=0;
