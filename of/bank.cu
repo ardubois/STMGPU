@@ -76,7 +76,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 	int id = threadIdx.x + blockIdx.x * blockDim.x;
 	//long mod = 0xFFFF;
 	int rnd;
-	long probRead= prRead;
+	int probRead= prRead;
     int locator_queue[MAX_LOCATORS];
 	TX_Data* tx_data = TX_Init(stm_data,id,locator_queue);
 	
@@ -118,9 +118,10 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 			TX_Start(stm_data,tx_data);
             //printf("1TXISABORTED %d\n", txData.isAborted);			
 			//Read-Only TX
+			printf("rnd %d probread %d\n", rnd, probRead);
 			if(rnd <= probRead)
 			{
-				printf("rnd %d probread %d\n", rnd, probRead);
+				//printf("rnd %d probread %d\n", rnd, probRead);
 				value=0;
 				for(int i=0; i<roSize && stm_data->tr_state[tx_data->tr_id] != ABORTED; i++)//for(int i=0; i<roSize && txData.isAborted==false; i++)//
 				{
