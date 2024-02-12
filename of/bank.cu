@@ -120,7 +120,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 			//Read-Only TX
 			if(rnd <= probRead)
 			{
-			//	printf("rnd %d probread %d\n", rnd, probRead);
+				printf("rnd %d probread %d\n", rnd, probRead);
 				value=0;
 				for(int i=0; i<roSize && stm_data->tr_state[tx_data->tr_id] != ABORTED; i++)//for(int i=0; i<roSize && txData.isAborted==false; i++)//
 				{
