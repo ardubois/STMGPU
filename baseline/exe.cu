@@ -49,7 +49,7 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
 
 	int id = threadIdx.x + blockIdx.x * blockDim.x;
 	long mod = 0xFFFF;
-	long rnd;
+	int rnd;
 	int probRead = prRead;
 
 	uint64_t state = seed+id;
