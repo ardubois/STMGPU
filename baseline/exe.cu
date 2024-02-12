@@ -271,7 +271,7 @@ void getKernelOutput(Statistics *h_stats, time_rate *h_times, uint threadNum, in
 
 			printf("nbCommits: %d\n", h_stats->nbCommits);
 			printf("writes: %d\n",totUpdates);
-			printf("reads %d\n",totUpdates);
+			printf("reads %d\n",totReads);
 }
 
 int main(int argc, char *argv[])
