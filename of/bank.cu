@@ -345,7 +345,7 @@ int main(int argc, char *argv[])
 	  "  6) update TX Size                 \n"
 	  "  7) verbose		                   \n"
 	"";
-	const int NB_ARGS = 6;
+	const int NB_ARGS = 8;
 	int argCnt = 1;
 	
 	if (argc != NB_ARGS) {
