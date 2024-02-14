@@ -10,7 +10,7 @@
 #define WriteSetSize	200
 #define ReadSetSize		200
 
-#define MAX_LOCATORS 1000
+#define MAX_LOCATORS 5000
 
 #define ACTIVE      1
 #define COMMITTED   2
