@@ -182,10 +182,12 @@ void getKernelOutput(time_rate *h_times, uint threadNum, int peak_clk, float tot
 	float rt_commit=0.0;
 	rt_commit	=	avg_commit / avg_runtime;
 
-	printf("nbCommits: %d\n", nbCommits);
+	//printf("nbCommits: %d\n", nbCommits);
 	
 	if(verbose)
-		printf("AbortPercent\t%f %%\nThroughtput\t%f\n\nTotal\t\t%f\nRuntime\t\t%f\nCommit\t\t%f\t%.2f%%\nWaste\t\t%f\n",
+	    printf("PR-STM\nCommits: %d\n", nbCommits);
+
+		/*printf("AbortPercent\t%f %%\nThroughtput\t%f\n\nTotal\t\t%f\nRuntime\t\t%f\nCommit\t\t%f\t%.2f%%\nWaste\t\t%f\n",
 			(float)nbAborts/(nbAborts+nbCommits)*100.0,
 			nbCommits/totT_ms*1000.0,
 			avg_total,
@@ -193,7 +195,7 @@ void getKernelOutput(time_rate *h_times, uint threadNum, int peak_clk, float tot
 			avg_commit,
 			rt_commit*100.0,
 			avg_waste
-			);
+			);*/
 	else
 		printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\n", 
 			(float)nbAborts/(nbAborts+nbCommits)*100.0,
