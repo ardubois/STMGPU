@@ -691,7 +691,23 @@ __host__ __device__ void print_locator(STMData* stm_data,Locator *locator)
 }
 
 
+void print_data(STMData* stm_data)
+{
+  int size = stm_data -> num_tr;
+//  printf("size: %d\n",size);
+  TX_Data* tx_data = stm_data -> tx_data;
+  int aborted = 0 ;
+  int committed = 0;
+  int size_locators = 0; 
+  for(int i=0; i< size; i++)
+  {
+    aborted += tx_data[i].n_aborted;
+    committed += tx_data[i].n_committed;
+    size_locators += tx_data[i].next_locator;
+  }
+  printf("OFG-STM\tcommits\t%d\taborts\t%d\tlocators\t%d\n" aborted, committed,size_locators);
 
+}
 
 void print_stats(STMData* stm_data)
 {

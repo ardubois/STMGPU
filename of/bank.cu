@@ -431,7 +431,7 @@ int main(int argc, char *argv[])
 	cudaMemcpy(h_stats, d_stats, sizeof(Statistics), cudaMemcpyDeviceToHost);
   	cudaMemcpy(h_times, d_times, blockNum*threads_per_block*sizeof(time_rate), cudaMemcpyDeviceToHost);
   	
-  	getKernelOutput(h_stats, h_times, blockNum*threads_per_block, peak_clk, totT_ms, verbose);
+  	//getKernelOutput(h_stats, h_times, blockNum*threads_per_block, peak_clk, totT_ms, verbose);
 	
 	
   //kernelErr = cudaGetLastError();
@@ -440,7 +440,8 @@ int main(int argc, char *argv[])
   STM_copy_from_device(d_stm_data,stm_data);
   //printf("FIM!\n");
   //print_stats(stm_data);
-
+    print_data(stm_data);
+	
 	free(h_stats);
 	free(h_times);
 	cudaFree(d_stats);

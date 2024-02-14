@@ -89,5 +89,6 @@ void print_vboxes(STMData* stm_data);
 __host__ __device__ void print_tr_state(int tr_state);
 __host__ __device__ void print_locator(STMData* stm_data,Locator *locator);
 void print_stats(STMData* stm_data);
+void print_data(STMData* stm_data);
 
 //#endif
