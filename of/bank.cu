@@ -267,9 +267,10 @@ void getKernelOutput(Statistics *h_stats, time_rate *h_times, uint threadNum, in
 
 	int nbAborts = h_stats->nbAbortsDataAge + h_stats->nbAbortsRecordAge + h_stats->nbAbortsReadWrite;
 
-	printf("--- nbaborts:  %d nbcommits: %d\n\n----------",h_stats->nbAbortsDataAge,h_stats->nbCommits);
+	//printf("--- nbaborts:  %d nbcommits: %d\n\n----------",h_stats->nbAbortsDataAge,h_stats->nbCommits);
 	if(verbose)
-		printf("AbortPercent\t%f %%\nThroughtput\t%f\n\nAbortDataAge\t%f %%\nAbortRecAge\t%f %%\nAbortReadWrite\t%f %%\nAbortPreVal\t%f %%\n\nTotal\t\t%f\nRuntime\t\t%f\nCommit\t\t%f\t%.2f%%\nWaitTime\t%f\t%.2f%%\nPreValidation\t%f\t%.2f%%\n1stValidation\t%f\t%.2f%%\nRecInsertVals\t%f\t%.2f%%\nRecInsert\t%f\t%.2f%%\nWriteBack\t%f\t%.2f%%\nWaste\t\t%f\n\nComparisons\t%f\nTotalUpdates\t%d\nTotalReads\t%d\n", 
+	    printf("OFG-STM\nCommits: %d\nThroughput: %d\ntotoms: %\n", h_stats->nbCommits,h_stats->nbCommits/5000*1000.0, totT_ms);
+	   /*printf("AbortPercent\t%f %%\nThroughtput\t%f\n\nAbortDataAge\t%f %%\nAbortRecAge\t%f %%\nAbortReadWrite\t%f %%\nAbortPreVal\t%f %%\n\nTotal\t\t%f\nRuntime\t\t%f\nCommit\t\t%f\t%.2f%%\nWaitTime\t%f\t%.2f%%\nPreValidation\t%f\t%.2f%%\n1stValidation\t%f\t%.2f%%\nRecInsertVals\t%f\t%.2f%%\nRecInsert\t%f\t%.2f%%\nWriteBack\t%f\t%.2f%%\nWaste\t\t%f\n\nComparisons\t%f\nTotalUpdates\t%d\nTotalReads\t%d\n", 
 			(float)nbAborts/(nbAborts+h_stats->nbCommits)*100.0,
 			h_stats->nbCommits/totT_ms*1000.0,
 			(float)h_stats->nbAbortsDataAge/(nbAborts+h_stats->nbCommits)*100.0,
@@ -296,7 +297,7 @@ void getKernelOutput(Statistics *h_stats, time_rate *h_times, uint threadNum, in
 			avg_comp,
 			totUpdates,
 			totReads
-			);
+			);*/
 	else
 		printf("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", 
 			(float)nbAborts/(nbAborts+h_stats->nbCommits)*100.0,
@@ -435,10 +436,10 @@ int main(int argc, char *argv[])
 	
   //kernelErr = cudaGetLastError();
   //if(kernelErr != cudaSuccess) printf("Error synchronize: %s\n", cudaGetErrorString(kernelErr));
-  printf("ACABOU!\n");
+  
   STM_copy_from_device(d_stm_data,stm_data);
-  printf("FIM!\n");
-  print_stats(stm_data);
+  //printf("FIM!\n");
+  //print_stats(stm_data);
 
 	free(h_stats);
 	free(h_times);
