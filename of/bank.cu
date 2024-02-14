@@ -356,11 +356,11 @@ int main(int argc, char *argv[])
 	seed 				= 1;
 	dataSize			= atoi(argv[argCnt++]);
 	threads_per_block	= atoi(argv[argCnt++]);
-	blockNum	=1;//	 	= atoi(argv[argCnt++]);
+	blockNum		 	= atoi(argv[argCnt++]);
 	prRead 				= atoi(argv[argCnt++]);
 	roSize 				= atoi(argv[argCnt++]);
 	threadSize			= atoi(argv[argCnt++]);
-	verbose		=1;//		= atoi(argv[argCnt++]);
+	verbose				= atoi(argv[argCnt++]);
 
 #if DISJOINT
 	dataSize=100*blockNum*threads_per_block;
