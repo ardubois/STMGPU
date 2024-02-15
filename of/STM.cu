@@ -705,7 +705,7 @@ void print_data(STMData* stm_data)
     committed += tx_data[i].n_committed;
     size_locators += tx_data[i].next_locator;
   }
-  printf("OFG-STM\tcommits\t%d\taborts\t%d\tlocators\t%d\n", aborted, committed,size_locators);
+  printf("OFG-STM\tcommits\t%d\taborts\t%d\tlocators\t%d\n",committed, aborted,size_locators);
 
 }
 
