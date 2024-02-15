@@ -540,7 +540,7 @@ __device__  int TX_contention_manager4(STMData* stm_data, TX_Data* tx_data,unsig
 // best 4
 __device__  int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
-  return TX_contention_manager6(stm_data,tx_data, me, enemy);
+  return TX_contention_manager7(stm_data,tx_data, me, enemy);
 }
 
 
