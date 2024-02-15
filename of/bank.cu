@@ -399,6 +399,7 @@ int main(int argc, char *argv[])
 	int num_locators = MAX_LOCATORS;
 	int num_tx = threads_per_block * blockNum;
 	STMData* stm_data = STM_start(num_objects, num_tx, num_locators); 
+	printf("Data size: %d",dataSize);
     init_objects(stm_data,num_objects,100);
     init_locators(stm_data,num_tx,num_locators);
 
@@ -431,7 +432,7 @@ int main(int argc, char *argv[])
 	cudaMemcpy(h_stats, d_stats, sizeof(Statistics), cudaMemcpyDeviceToHost);
   	cudaMemcpy(h_times, d_times, blockNum*threads_per_block*sizeof(time_rate), cudaMemcpyDeviceToHost);
   	
-  	//getKernelOutput(h_stats, h_times, blockNum*threads_per_block, peak_clk, totT_ms, verbose);
+  	getKernelOutput(h_stats, h_times, blockNum*threads_per_block, peak_clk, totT_ms, verbose);
 	
 	
   //kernelErr = cudaGetLastError();
@@ -441,7 +442,7 @@ int main(int argc, char *argv[])
   //printf("FIM!\n");
   //print_stats(stm_data);
     print_data(stm_data);
-	
+
 	free(h_stats);
 	free(h_times);
 	cudaFree(d_stats);
