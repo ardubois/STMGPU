@@ -266,7 +266,7 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 		times[tid].dataWrite+= stop_writeback - start_writeback;
 		times[tid].wait 	+= stop_wait - start_wait;
 	}
-	
+	printf("SAIU\n");
 	times[tid].nbReadOnly = reads;
 	times[tid].nbUpdates  = updates;
 
