@@ -300,7 +300,7 @@ __global__ void server_kernel(int *flag,gbc_pack_t gbc_pack, readSet* rs, writeS
 	// printf("init recv\n");
 	gc_receiver_leader(gbc_pack);
 	// printf("leader\n");
-	while(1)
+	while((*flag & 1)==0)
 	{
 		worker_thread(gbc_pack, &metadata, records, rs, ws, wRes, stats, times);
 	}
