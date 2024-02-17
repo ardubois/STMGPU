@@ -3,10 +3,10 @@
 all: bank 
 
 bank : API.cu API.cuh exe.cu 
-	nvcc exe.cu API.cu -rdc=true -Wno-deprecated-declarations -Xptxas -O3 -lcuda -lcudart --gpu-architecture=sm_61 --maxrregcount 63 -o bank
+	nvcc exe.cu API.cu -rdc=true -Wno-deprecated-declarations -Xptxas -O3 -lcuda -lcudart --maxrregcount 63 -o bank
 
 Slc_SMptr: API.cu API.cuh sliced.cu 
 	nvcc sliced.cu API.cu -rdc=true -Wno-deprecated-declarations -Xptxas -O3 -lcuda -lcudart --gpu-architecture=sm_61 --maxrregcount 63 -o Slc_SMptr
 
 clean:
-	rm -f  Slc_SMptr Slc_SMptr
+	rm bank
