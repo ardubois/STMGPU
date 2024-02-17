@@ -144,7 +144,7 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 #endif
 
 	while((*flag & 1)==0)
-	{
+	{ printf("aqui\n");
 		waitMem = *flag;
 		retry=1;
 
