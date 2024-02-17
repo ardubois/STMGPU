@@ -276,7 +276,7 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 }
 
 __device__ void worker_thread(gbc_pack_t gbc_pack, SERV_ARG_DEF)
-{  printf("worker thread\n");
+{  //printf("worker thread\n");
 	uint m_warp_id = thread_id_x() / 32;
 
 	VAR_BUF_DEF0
