@@ -290,7 +290,7 @@ __device__ void worker_thread(gbc_pack_t gbc_pack, SERV_ARG_DEF)
 }
 
 
-__global__ void server_kernel(gbc_pack_t gbc_pack, readSet* rs, writeSet* ws, TXRecord* records, warpResult* wRes, Statistics* stats, time_rate* times)
+__global__ void server_kernel(int *flag,gbc_pack_t gbc_pack, readSet* rs, writeSet* ws, TXRecord* records, warpResult* wRes, Statistics* stats, time_rate* times)
 {
 	__shared__ TMmetadata metadata;
 	//__shared__ uint txNumber[TXRecordSize];
@@ -299,7 +299,7 @@ __global__ void server_kernel(gbc_pack_t gbc_pack, readSet* rs, writeSet* ws, TX
 	 printf("init recv\n");
 	gc_receiver_leader(gbc_pack);
 	 printf("leader\n");
-	while(1)
+	while((*flag & 1)==0)
 	{
 		worker_thread(gbc_pack, &metadata, records, rs, ws, wRes, stats, times);
 	}
@@ -316,7 +316,7 @@ __global__ void parent_kernel(int *flag, uint total_sender_bk, uint sender_block
 	cudaStream_t s2;
 	cudaStreamCreateWithFlags(&s2, cudaStreamNonBlocking);
 
-	server_kernel<<<total_recevier_bk, recv_block_size, 0, s2>>>(gbc_pack, rs, ws, records, wRes, stats, times);
+	server_kernel<<<total_recevier_bk, recv_block_size, 0, s2>>>(flag,gbc_pack, rs, ws, records, wRes, stats, times);
 
 	cudaStream_t s1;
 	cudaStreamCreateWithFlags(&s1, cudaStreamNonBlocking);
