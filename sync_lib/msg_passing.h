@@ -331,7 +331,7 @@ if(assign_size != 32)
 						}
 					}
 				} else if (exit_check_counter == 512) {
-					printf("chanel exit %d\n", exit_check_counter);
+					//printf("chanel exit %d\n", exit_check_counter);
 					//the point is that we must check bitmask array after G count reaches 0
 					if (leader_head_ptr[channel]
 							== gbc_pack.gbc[channel].write_ptr[block_id_x()]) {
