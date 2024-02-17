@@ -266,12 +266,13 @@ __global__ void client_kernel(gbc_t gbc, int *flag, uint64_t seed, uint threadNu
 		times[tid].dataWrite+= stop_writeback - start_writeback;
 		times[tid].wait 	+= stop_wait - start_wait;
 	}
-	printf("SAIU\n");
+	printf("SAIU %d\n",tid);
 	times[tid].nbReadOnly = reads;
 	times[tid].nbUpdates  = updates;
 
 	//exit process
 	base_exit(gbc);
+	printf("encerrou %d\n",tid);
 }
 
 __device__ void worker_thread(gbc_pack_t gbc_pack, SERV_ARG_DEF)
