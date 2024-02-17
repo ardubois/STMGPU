@@ -405,7 +405,7 @@ void test_fine_grain_offloading(int seed, int dataSize, int client_block_size, i
 	//Take the time the kernel took to complete
 	cudaEventElapsedTime(&tKernel_ms, start, stop);
 	totT_ms += tKernel_ms;
-
+    printf("free\n");
 	free_gbc(gbc_pack);
 	TXEnd(dataSize, h_data, &d_data, &rs, &ws, &wRes);
 
