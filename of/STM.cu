@@ -140,6 +140,7 @@ __device__ void TX_Start(STMData* stm_data, TX_Data* d)
     d -> cm_enemy = -1;
     d -> cm_aborts = 0;
     stm_data -> tr_state[d->tr_id] = ACTIVE;
+    d-> enemies_size = 0;
 }
 
 __device__ void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
@@ -445,6 +446,29 @@ __device__  int* TX_Open_Write(STMData* stm_data, TX_Data* tx_data, uint object)
    return 0;
 }
 
+__device__  int is_enemy(TX_Data* tx_data,unsigned int enemy)
+{
+  for(int i = 0; i< tx_data->enemies_size;i++)
+  {
+    if(tx_data->cm_enemies[i]== enemy)
+      return 1;
+  }
+  return 0;
+}
+
+__device__  int TX_contention_manager9(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
+{
+  if(is_enemy(tx_data,enemy))
+    return 1;
+  else
+  {
+    tx_data->cm_enemies[tx_data->enemies_size] = enemy;
+    tx_data->enemies_size++;
+  }
+  return 0;
+}
+
+
 __device__  int TX_contention_manager6(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
   if(tx_data->cm_enemy == enemy)
@@ -458,6 +482,8 @@ __device__  int TX_contention_manager6(STMData* stm_data, TX_Data* tx_data,unsig
   }
   return 0;
 }
+
+
 
 __device__  int TX_contention_manager8(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
