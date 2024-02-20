@@ -203,6 +203,8 @@ __global__ void bank_kernel(int *flag, unsigned int seed, int prRead, unsigned i
                         }
   			if(stm_data->tr_state[tx_data->tr_id] == ABORTED)
 			{
+				TX_abort_tr(stm_data,tx_data);
+					atomicAdd(&(stats->nbAbortsDataAge), 1);
 				stop_aborted_tx = clock64();
 				wastedTime += stop_aborted_tx - start_time_tx;
 			}
