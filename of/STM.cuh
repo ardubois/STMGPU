@@ -50,6 +50,8 @@ typedef struct TX_Data_
     unsigned short n_committed; // maximum 1
     int cm_enemy;
     unsigned int cm_aborts;
+    int cm_enemies[WriteSetSize];
+    int enemies_size;
 } TX_Data;
 
 typedef struct STMData_
