@@ -507,7 +507,7 @@ __device__  int TX_contention_manager5(STMData* stm_data, TX_Data* tx_data,unsig
 {
   if(tx_data->n_aborted > 100)
   { 
-    return 1;
+    return 0;
     
   }
   return 0;
