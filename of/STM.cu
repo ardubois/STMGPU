@@ -450,7 +450,7 @@ __device__  int TX_contention_manager6(STMData* stm_data, TX_Data* tx_data,unsig
   if(tx_data->cm_enemy == enemy)
   { 
     tx_data->cm_aborts ++;
-   // if(tx_data->cm_aborts>=10)
+    if(tx_data->cm_aborts>=10)
       return 1;
   } else {
     tx_data->cm_enemy = enemy;
