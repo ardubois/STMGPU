@@ -459,6 +459,26 @@ __device__  int TX_contention_manager6(STMData* stm_data, TX_Data* tx_data,unsig
   return 0;
 }
 
+__device__  int TX_contention_manager8(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
+{
+  if(tx_data->cm_enemy == enemy)
+  { 
+    tx_data->cm_aborts ++;
+    if(tx_data->cm_aborts>=10)
+    {
+      if(data_enemy-> write_set.size < tx_data ->write_set.size)
+      {
+        return 1;
+      }
+     
+    }
+  } else {
+    tx_data->cm_enemy = enemy;
+    tx_data->cm_aborts =0;
+  }
+  return 0;
+}
+
 __device__  int TX_contention_manager7(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
 
@@ -540,7 +560,7 @@ __device__  int TX_contention_manager4(STMData* stm_data, TX_Data* tx_data,unsig
 // best 4
 __device__  int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
-  return TX_contention_manager6(stm_data,tx_data, me, enemy);
+  return TX_contention_manager8(stm_data,tx_data, me, enemy);
 }
 
 
