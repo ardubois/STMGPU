@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define PR_MAX_RWSET_SIZE 6000
+#define PR_MAX_RWSET_SIZE 4000
 
 #include "pr-stm.cuh"
 #include "pr-stm-internal.cuh"
