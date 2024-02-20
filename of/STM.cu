@@ -505,7 +505,7 @@ __device__  int TX_contention_manager2(STMData* stm_data, TX_Data* tx_data,unsig
 
 __device__  int TX_contention_manager5(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
-  if(tx_data->n_aborted > 100000000)
+  if(tx_data->n_aborted > 100)
   { 
     return 1;
     
@@ -540,7 +540,7 @@ __device__  int TX_contention_manager4(STMData* stm_data, TX_Data* tx_data,unsig
 // best 4
 __device__  int TX_contention_manager(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
 {
-  return TX_contention_manager1(stm_data,tx_data, me, enemy);
+  return TX_contention_manager5(stm_data,tx_data, me, enemy);
 }
 
 
