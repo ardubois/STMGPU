@@ -464,7 +464,7 @@ __device__  int TX_contention_manager8(STMData* stm_data, TX_Data* tx_data,unsig
   if(tx_data->cm_enemy == enemy)
   { 
     tx_data->cm_aborts ++;
-    if(tx_data->cm_aborts>=10)
+    if(tx_data->cm_aborts>=100)
     {
       TX_Data *data_enemy = &stm_data -> tx_data[enemy];
       if(data_enemy-> write_set.size < tx_data ->write_set.size)
