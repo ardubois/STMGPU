@@ -528,10 +528,10 @@ __device__  int TX_contention_manager5(STMData* stm_data, TX_Data* tx_data,unsig
 {
   if(tx_data->n_aborted > 100)
   { 
-    return 0;
+    return 1;
     
   }
-  return 0;
+  return 1;
 }
 
 __device__  int TX_contention_manager1(STMData* stm_data, TX_Data* tx_data,unsigned int me, unsigned int enemy)
