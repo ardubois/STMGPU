@@ -137,10 +137,15 @@ __device__ void TX_Start(STMData* stm_data, TX_Data* d)
     d -> write_set.size = 0;
     //d -> n_aborted = 0;
    // d -> n_committed = 0;
-    d -> cm_enemy = -1;
-    d -> cm_aborts = 0;
+    
+    if(stm_data -> tr_state[d->tr_id]== COMMITED)
+    {
+      d-> enemies_size = 0;
+      d -> cm_enemy = -1;
+      d -> cm_aborts = 0;
+    }
     stm_data -> tr_state[d->tr_id] = ACTIVE;
-    d-> enemies_size = 0;
+    
 }
 
 __device__ void TX_garbage_collect(STMData* stm_data, TX_Data* tx_data)
