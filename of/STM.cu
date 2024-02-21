@@ -138,7 +138,7 @@ __device__ void TX_Start(STMData* stm_data, TX_Data* d)
     //d -> n_aborted = 0;
    // d -> n_committed = 0;
     
-    if(stm_data -> tr_state[d->tr_id]== COMMITED)
+    if(stm_data -> tr_state[d->tr_id]== COMMITTED)
     {
       d-> enemies_size = 0;
       d -> cm_enemy = -1;
