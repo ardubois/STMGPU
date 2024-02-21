@@ -7,11 +7,11 @@
 #include <stdint.h>
 
 #ifndef MaxWriteSetSize
-#define MaxWriteSetSize 1024
+#define MaxWriteSetSize 200
 #endif // MaxWriteSetSize
 
 #ifndef MaxReadSetSize
-#define MaxReadSetSize 1024
+#define MaxReadSetSize 200
 #endif // MaxReadSetSize
 
 #ifndef TXRecordSize
