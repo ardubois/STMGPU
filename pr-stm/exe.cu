@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define PR_MAX_RWSET_SIZE 4000
+#define PR_MAX_RWSET_SIZE 3000
 
 #include "pr-stm.cuh"
 #include "pr-stm-internal.cuh"
@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
 	//cudaMemcpy(h_stats, d_stats, sizeof(Statistics), cudaMemcpyDeviceToHost);
   	cudaMemcpy(h_times, d_times, blockNum*threads_per_block*sizeof(time_rate), cudaMemcpyDeviceToHost);
   	
-//printf("aborts: %d \ncommits: %d\n", *sumNbAborts, *sumNbCommits);
+printf("aborts: %d \ncommits: %d\n", *sumNbAborts, *sumNbCommits);
 
   	getKernelOutput(h_times, blockNum*threads_per_block, peak_clk, totT_ms, *sumNbCommits, *sumNbAborts, verbose);
 	TXEnd(dataSize, h_data, &d_data);
