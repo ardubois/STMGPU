@@ -1,6 +1,6 @@
 all: main
 
-main: API.o
+main: api
 	nvcc -rdc=true --maxrregcount 63 API.o exe.cu -o bank
 
 api: API.cu 
