@@ -444,8 +444,8 @@ int main(int argc, char *argv[])
   
   STM_copy_from_device(d_stm_data,stm_data);
   //printf("FIM!\n");
-  print_stats(stm_data);
-   // print_data(stm_data);
+  //print_stats(stm_data);
+    print_data(stm_data);
 
 	free(h_stats);
 	free(h_times);
